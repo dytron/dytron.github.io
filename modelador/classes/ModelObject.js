@@ -101,8 +101,28 @@ class ModelObject extends Primitive {
     
         return false;
     }
+    print() {
+        let result = "VERTICES\n";
+        for (let i = 0; i < this.vertices.length; i++) {
+            let v = this.vertices[i];
+            result += `v${i}: ${v.x}, ${v.y}, ${v.z}\n`;
+        }
+        result += "\nFACES\n";
+        for (let i = 0; i < this.model.faces.length; i++) {
+            let f = this.model.faces[i];
+            result += `f${i}: v${f[0]}, v${f[1]}, v${f[2]}\n`;
+        }
+        let s = 200 / this.getMaxRadius();
+        result += `SCALE: ${s}, ${s}, ${s}\n`;
+        return result;
+    }
+    createBRepSolid() {
+        return Solid.createSolidFromMesh(this.vertices, this.model.faces);
+    }
     draw() {
+        push();
         super.draw();
         model(this.model);
+        pop();
     }
 }

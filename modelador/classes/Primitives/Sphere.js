@@ -22,5 +22,8 @@ class Sphere extends Primitive {
     calculateVolume() {
         return 4 * Math.PI * (this.radius ** 3 ) / 3;
     }
+    calculateArea() {
+        return 4 * Math.PI * (this.radius ** 2 );
+    }
 }
 PRIMITIVES.push("sphere");

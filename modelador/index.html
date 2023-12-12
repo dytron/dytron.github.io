@@ -37,9 +37,13 @@
           <div id="octree-generate" class="side"></div>
       </div>
       <div class="side-csg">
-        <p>Constructive Solid Geometry</p>
+        <p>CSG / BRep</p>
+        <select id="csg-brep">
+          <option value="csg">CSG</option>
+          <option value="brep">BRep</option>
+        </select>
           <div id="csg">
-            <div>Tree<div>
+            <div>Input<div>
               <textarea id="csg-input" cols="50" rows="50"></textarea>
           </div>
       </div>
@@ -50,16 +54,27 @@
     <script src="classes/Matrix.js"></script>
     <script src="classes/Primitive.js"></script>
     <script src="classes/ModelObject.js"></script>
-    <script src="classes/CSGParser.js"></script>
-    <script src="classes/CSGTree.js"></script>
-    <script src="classes/CSGDifference.js"></script>
-    <script src="classes/CSGIntersection.js"></script>
-    <script src="classes/CSGRotation.js"></script>
-    <script src="classes/CSGTranslation.js"></script>
-    <script src="classes/CSGUnion.js"></script>
-    <script src="classes/CSGColor.js"></script>
-    <script src="classes/CSGSpecular.js"></script>
-    <script src="classes/CSGShine.js"></script>
+    <script src="classes/SolidObject.js"></script>
+
+    <script src="classes/CSG/CSGParser.js"></script>
+    <script src="classes/CSG/CSGTree.js"></script>
+    <script src="classes/CSG/CSGDifference.js"></script>
+    <script src="classes/CSG/CSGIntersection.js"></script>
+    <script src="classes/CSG/CSGRotation.js"></script>
+    <script src="classes/CSG/CSGTranslation.js"></script>
+    <script src="classes/CSG/CSGUnion.js"></script>
+    <script src="classes/CSG/CSGColor.js"></script>
+    <script src="classes/CSG/CSGSpecular.js"></script>
+    <script src="classes/CSG/CSGShine.js"></script>
+
+    <script src="classes/BRep/BRepNode.js"></script>
+    <script src="classes/BRep/Solid.js"></script>
+    <script src="classes/BRep/Edge.js"></script>
+    <script src="classes/BRep/Face.js"></script>
+    <script src="classes/BRep/HalfEdge.js"></script>
+    <script src="classes/BRep/Vertex.js"></script>
+    <script src="classes/BRep/Loop.js"></script>
+
     <script src="classes/Primitives/Box.js"></script>
     <script src="classes/Primitives/Sphere.js"></script>
     <script src="classes/Primitives/Cylinder.js"></script>

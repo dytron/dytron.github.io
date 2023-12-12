@@ -26,5 +26,10 @@ class Box extends Primitive {
     calculateVolume() {
         return this.width * this.height * this.depth;
     }
+    calculateArea() {
+        return this.width * this.height * 2
+            +  this.width * this.depth * 2
+            +  this.height * this.depth * 2;
+    }
 }
 PRIMITIVES.push("box");

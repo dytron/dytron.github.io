@@ -14,6 +14,7 @@ class Primitive {
       this.visible = true;
       this.description = "";
       this.volume = 0;
+      this.area = 0;
     }
     addVertex(x, y, z) {
       let point = new Point(x, y, z);
@@ -60,6 +61,7 @@ class Primitive {
     hasPoint(p) {}
     process() {
         this.volume = this.calculateVolume();
+        this.area = this.calculateArea();
     }
     getStroke() {
         return (this.selected) ? this.strokeColorSelected : this.strokeColor;
@@ -103,6 +105,9 @@ class Primitive {
         strokeWeight(this.getStrokeWeight());
     }
     calculateVolume() {
+        return 0;
+    }
+    calculateArea() {
         return 0;
     }
     print() {

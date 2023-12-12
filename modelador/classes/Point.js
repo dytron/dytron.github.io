@@ -23,7 +23,7 @@ class Point {
       return Math.sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
     }
     normalize() {
-      return this.divide(this.magnitude());
+      return this.div(this.magnitude());
     }
     applyOperation(matrix) {
       const vert = this.toMatrix();
