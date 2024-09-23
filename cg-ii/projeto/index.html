@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGL Application</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <div class="container">
+    <div id="panel">
+      <!-- Controles de Abas -->
+      <div class="tabs">
+        <button class="tab-button" onclick="openTab('camera-tab')">Camera</button>
+        <button class="tab-button" onclick="openTab('objects-tab')">Objects</button>
+        <button class="tab-button" onclick="openTab('lighting-tab')">Lighting</button>
+      </div>
+
+      <!-- Painel de Controle da Camera -->
+      <div id="camera-tab" class="tab-content">
+        <h2>Camera Controls</h2>
+
+        <label for="projection-select">Projection:</label>
+        <select id="projection-select" onchange="toggleProjectionFields()">
+          <option value="perspective">Perspective</option>
+          <option value="orthographic">Orthographic</option>
+        </select>
+
+        <!-- Inputs comuns -->
+        <div id="camera-position">
+          <div class="input-group">
+            <div class="label-row">
+              <label for="cam-pos-x">Position:</label>
+            </div>
+            <div class="input-row">
+              <input type="number" id="cam-pos-x" step="1" placeholder="X">
+              <input type="number" id="cam-pos-y" step="1" placeholder="Y">
+              <input type="number" id="cam-pos-z" step="1" placeholder="Z">
+            </div>
+          </div>
+        </div>
+
+        <div id="camera-rotation">
+          <div class="input-group">
+            <div class="label-row">
+              <label for="cam-rot-x">Rotation:</label>
+            </div>
+            <div class="input-row">
+              <input type="number" id="cam-rot-x" step="3" placeholder="X">
+              <input type="number" id="cam-rot-y" step="3" placeholder="Y">
+              <input type="number" id="cam-rot-z" step="3" placeholder="Z">
+            </div>
+          </div>
+        </div>
+
+        <div id="camera-target">
+          <div class="input-group">
+            <div class="label-row">
+              <label for="cam-target-x">Target:</label>
+            </div>
+            <div class="input-row">
+              <input type="number" id="cam-target-x" step="1" placeholder="X">
+              <input type="number" id="cam-target-y" step="1" placeholder="Y">
+              <input type="number" id="cam-target-z" step="1" placeholder="Z">
+            </div>
+          </div>
+        </div>
+
+        <div id="camera-upvector">
+          <div class="input-group">
+            <div class="label-row">
+              <label for="cam-up-x">Up Vector:</label>
+            </div>
+            <div class="input-row">
+              <input type="number" id="cam-up-x" step="1" placeholder="X">
+              <input type="number" id="cam-up-y" step="1" placeholder="Y">
+              <input type="number" id="cam-up-z" step="1" placeholder="Z">
+            </div>
+          </div>
+        </div>
+
+        <!-- Campos específicos de perspectiva -->
+        <div id="perspective-fields">
+          <div class="input-group">
+            <div class="label-row">
+              <label for="cam-fov">Field of View:</label>
+            </div>
+            <div class="input-row">
+              <input type="number" id="cam-fov" step="1" placeholder="FOV">
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="label-row">
+              <label for="cam-aspect">Aspect Ratio:</label>
+            </div>
+            <div class="input-row">
+              <input type="number" id="cam-aspect" step="0.01" placeholder="Aspect">
+            </div>
+          </div>
+        </div>
+
+        <!-- Campos específicos de ortográfica -->
+        <div id="orthographic-fields" style="display:none;">
+          <div class="input-group">
+            <div class="label-row">
+              <label for="cam-left">Left:</label>
+            </div>
+            <div class="input-row">
+              <input type="number" id="cam-left" step="1" placeholder="Left">
+              <input type="number" id="cam-right" step="1" placeholder="Right">
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="label-row">
+              <label for="cam-top">Top:</label>
+            </div>
+            <div class="input-row">
+              <input type="number" id="cam-top" step="1" placeholder="Top">
+              <input type="number" id="cam-bottom" step="1" placeholder="Bottom">
+            </div>
+          </div>
+        </div>
+
+        <!-- Escolha da cor de fundo da câmera -->
+        <div class="input-group">
+          <div class="label-row">
+            <label for="cam-bg-color">Background Color:</label>
+          </div>
+          <div class="input-row">
+            <input type="color" id="cam-bg-color">
+          </div>
+        </div>
+
+        <!-- Escolha da Skybox -->
+        <div class="input-group">
+          <div class="label-row">
+            <label for="cam-skybox-select">Skybox:</label>
+          </div>
+          <div class="input-row">
+            <select id="cam-skybox-select">
+              <option value="none">None</option>
+              <option value="cubemap">Example 1</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Painel de Controle dos Objetos -->
+      <div id="objects-tab" class="tab-content" style="display:none;">
+        <h2>Object Controls</h2>
+
+        <button id="add-object-btn">Add Object</button>
+        <button id="remove-object-btn">Remove Selected Object</button>
+
+        <label for="object-select">Select Object:</label>
+        <select id="object-select">
+          <!-- Objetos serão adicionados aqui dinamicamente -->
+        </select>
+
+        <div id="transform-controls">
+          <h3>Transformations</h3>
+
+          <div class="input-group">
+            <div class="label-row">
+              <label for="pos-x">Position:</label>
+            </div>
+            <div class="input-row">
+              <input type="number" id="pos-x" step="0.01" placeholder="X">
+              <input type="number" id="pos-y" step="0.01" placeholder="Y">
+              <input type="number" id="pos-z" step="0.01" placeholder="Z">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="label-row">
+              <label for="rot-x">Rotation:</label>
+            </div>
+            <div class="input-row">
+              <input type="number" id="rot-x" step="10" placeholder="X">
+              <input type="number" id="rot-y" step="10" placeholder="Y">
+              <input type="number" id="rot-z" step="10" placeholder="Z">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="label-row">
+              <label for="scale-x">Scale:</label>
+            </div>
+            <div class="input-row">
+              <input type="number" id="scale-x" step="0.01" placeholder="X">
+              <input type="number" id="scale-y" step="0.01" placeholder="Y">
+              <input type="number" id="scale-z" step="0.01" placeholder="Z">
+            </div>
+          </div>
+        </div>
+
+        <div id="renderer-controls">
+          <h3>Renderer</h3>
+          <div class="input-group">
+            <label for="render-to-texture">Render to Texture: </label>
+            <input type="checkbox" id="render-to-texture">
+          </div>
+          <label for="renderer-select">Select Renderer:</label>
+          <select id="renderer-select">
+            <option value="default">Default</option>
+            <option value="surface-normal">Surface Normal</option>
+            <option value="point">Point</option>
+            <option value="flat">Flat</option>
+            <option value="wireframe">Wireframe</option>
+            <option value="material">Material</option>
+            <option value="reflections">Reflections</option>
+            <option value="shadow-map">Shadows</option>
+          </select>
+
+          <!-- Campos adicionais dependendo do renderer selecionado -->
+
+          <div id="additional-renderer-controls"></div>
+
+        </div>
+      </div>
+
+      <!-- Painel de Controle de Iluminação -->
+      <div id="lighting-tab" class="tab-content" style="display:none;">
+        <h2>Lighting Controls</h2>
+
+        <!-- Direcional Light -->
+        <h3>Directional Light</h3>
+        <div class="input-group">
+          <label for="dir-light-active">Active:</label>
+          <input type="checkbox" id="dir-light-active">
+        </div>
+
+        <div class="input-group">
+          <div class="label-row">
+            <label for="dir-light-dir-x">Direction (vector):</label>
+          </div>
+          <div class="input-row">
+            <input type="number" id="dir-light-dir-x" placeholder="X">
+            <input type="number" id="dir-light-dir-y" placeholder="Y">
+            <input type="number" id="dir-light-dir-z" placeholder="Z">
+          </div>
+        </div>
+
+        <div>
+          <div class="label-row">
+            <label for="dir-light-ambient">Ambient Color:</label>
+          </div>
+          <div class="input-row">
+            <input type="color" id="dir-light-ambient">
+          </div>
+        </div>
+
+        <div>
+          <div class="label-row">
+            <label for="dir-light-diffuse">Diffuse Color:</label>
+          </div>
+          <input type="color" id="dir-light-diffuse">
+        </div>
+
+        <div>
+          <div class="label-row">
+            <label for="dir-light-specular">Specular Color:</label>
+          </div>
+          <div class="input-row">
+            <input type="color" id="dir-light-specular">
+          </div>
+        </div>
+
+        <!-- Point Light -->
+        <h3>Point Light</h3>
+        <div class="input-group">
+          <label for="point-light-select">Select Point Light:</label>
+          <select id="point-light-select">
+            <option value="point-light-1">Point Light 1</option>
+            <option value="point-light-2">Point Light 2</option>
+            <option value="point-light-3">Point Light 3</option>
+            <option value="point-light-4">Point Light 4</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="point-light-active">Active:</label>
+          <input type="checkbox" id="point-light-active">
+        </div>
+
+        <div class="input-group">
+          <div class="label-row">
+            <label for="point-light-pos-x">Position:</label>
+          </div>
+          <div class="input-row">
+            <input type="number" id="point-light-pos-x" placeholder="X">
+            <input type="number" id="point-light-pos-y" placeholder="Y">
+            <input type="number" id="point-light-pos-z" placeholder="Z">
+          </div>
+        </div>
+
+        <div>
+          <div class="label-row">
+            <label for="point-light-ambient">Ambient Color:</label>
+          </div>
+          <input type="color" id="point-light-ambient">
+        </div>
+
+        <div>
+          <div class="label-row">
+            <label for="point-light-diffuse">Diffuse Color:</label>
+          </div>
+          <input type="color" id="point-light-diffuse">
+        </div>
+
+        <div>
+          <div class="label-row">
+            <label for="point-light-specular">Specular Color:</label>
+          </div>
+          <input type="color" id="point-light-specular">
+        </div>
+
+        <div>
+          <label for="point-light-constant">Constant Attenuation:</label>
+          <input type="number" id="point-light-constant" step="0.01" placeholder="1.0">
+        </div>
+
+        <div>
+          <label for="point-light-linear">Linear Attenuation:</label>
+          <input type="number" id="point-light-linear" step="0.01" placeholder="0.09">
+        </div>
+
+        <div>
+          <label for="point-light-quadratic">Quadratic Attenuation:</label>
+          <input type="number" id="point-light-quadratic" step="0.01" placeholder="0.032">
+        </div>
+
+        <!-- Spot Light -->
+        <h3>Spot Light</h3>
+        <div class="input-group">
+          <label for="spot-light-active">Active:</label>
+          <input type="checkbox" id="spot-light-active">
+        </div>
+
+        <div class="input-group">
+          <div class="label-row">
+            <label for="spot-light-pos-x">Position:</label>
+          </div>
+          <div class="input-row">
+            <input type="number" id="spot-light-pos-x" step="0.1" placeholder="X">
+            <input type="number" id="spot-light-pos-y" step="0.1" placeholder="Y">
+            <input type="number" id="spot-light-pos-z" step="0.1" placeholder="Z">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="label-row">
+            <label for="spot-light-dir-x">Direction (vector):</label>
+          </div>
+          <div class="input-row">
+            <input type="number" id="spot-light-dir-x" step="0.1" placeholder="X">
+            <input type="number" id="spot-light-dir-y" step="0.1" placeholder="Y">
+            <input type="number" id="spot-light-dir-z" step="0.1" placeholder="Z">
+          </div>
+        </div>
+
+        <div>
+          <div class="label-row">
+            <label for="spot-light-ambient">Ambient Color:</label>
+          </div>
+
+          <div class="input-row">
+            <input type="color" id="spot-light-ambient">
+          </div>
+        </div>
+
+        <div>
+          <div class="label-row">
+            <label for="spot-light-diffuse">Diffuse Color:</label>
+          </div>
+
+          <div class="input-row">
+            <input type="color" id="spot-light-diffuse">
+          </div>
+        </div>
+
+        <div>
+          <div class="label-row">
+            <label for="spot-light-specular">Specular Color:</label>
+          </div>
+          <div class="input-row">
+            <input type="color" id="spot-light-specular">
+          </div>
+        </div>
+
+        <div>
+          <label for="spot-light-constant">Constant Attenuation:</label>
+          <input type="number" id="spot-light-constant" step="0.01" placeholder="1.0">
+        </div>
+
+        <div>
+          <label for="spot-light-linear">Linear Attenuation:</label>
+          <input type="number" id="spot-light-linear" step="0.01" placeholder="0.09">
+        </div>
+
+        <div>
+          <label for="spot-light-quadratic">Quadratic Attenuation:</label>
+          <input type="number" id="spot-light-quadratic" step="0.01" placeholder="0.032">
+        </div>
+
+        <div>
+          <label for="spot-light-cutoff">Cut Off Angle (Degrees):</label>
+          <input type="number" id="spot-light-cutoff" step="1" placeholder="0.91">
+        </div>
+
+        <div>
+          <label for="spot-light-outer-cutoff">Outer Cut Off Angle (Degrees):</label>
+          <input type="number" id="spot-light-outer-cutoff" step="1" placeholder="0.82">
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+  <canvas id="c"></canvas>
+  </div>
+
+  <!-- Modal -->
+  <div id="add-object-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Select Object to Add</h2>
+      <select id="object-type-select">
+        <option value="teapot">Teapot</option>
+        <option value="cube">Cube</option>
+        <option value="windmill">Windmill</option>
+        <option value="sphere">Sphere</option>
+        <!-- Adicione mais opções conforme necessário -->
+      </select>
+      <button id="confirm-add-object">Confirm</button>
+      <button id="cancel-add-object">Cancel</button>
+    </div>
+  </div>
+
+  <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+  <script src="index.js" type="module"></script>
+  <script>
+    function openTab(tabName) {
+      var i, tabcontent, tabbuttons;
+
+      // Obtém todo o conteúdo das abas e esconde todos
+      tabcontent = document.getElementsByClassName("tab-content");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none"; // Esconde todas as abas
+      }
+
+      // Remove a classe 'active' de todos os botões de aba
+      tabbuttons = document.getElementsByClassName("tab-button");
+      for (i = 0; i < tabbuttons.length; i++) {
+        tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
+      }
+
+      // Exibe a aba selecionada
+      document.getElementById(tabName).style.display = "block";
+
+      // Adiciona a classe 'active' ao botão que abriu a aba
+      event.currentTarget.className += " active";
+    }
+
+    // Alterna os campos com base na projeção selecionada
+    function toggleProjectionFields() {
+      const projectionSelect = document.getElementById("projection-select");
+      const perspectiveFields = document.getElementById("perspective-fields");
+      const orthographicFields = document.getElementById("orthographic-fields");
+
+      if (projectionSelect.value === "perspective") {
+        perspectiveFields.style.display = "block";
+        orthographicFields.style.display = "none";
+      } else {
+        perspectiveFields.style.display = "none";
+        orthographicFields.style.display = "block";
+      }
+    }
+
+    // Abre a primeira aba por padrão e inicializa a projeção
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelector(".tab-button").click();
+      toggleProjectionFields();
+    });
+  </script>
+</body>
