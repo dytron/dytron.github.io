@@ -2,7 +2,6 @@ export class TextureManager {
     constructor() {
         this.textures = {};
     }
-
     // Método para carregar um cubemap
     loadCubeMap(name, orientations = ["posx", "negx", "posy", "negy", "posz", "negz"]) {
         if (name in this.textures) return;
@@ -30,6 +29,7 @@ export class TextureManager {
 
             image.onload = () => {
                 gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
                 gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
                 loadedImages++;

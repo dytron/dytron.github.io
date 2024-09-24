@@ -110,7 +110,7 @@ export class Model extends SceneObject {
         }
 
         // Se a renderização em textura estiver ativada
-        if (this.useRenderToTexture) {
+        if (this.useRenderToTexture && this.renderer instanceof MaterialRenderer) {
             // Renderiza para a textura
             const viewMatrix2 = mat4.create();
             const projectionMatrix2 = mat4.create();

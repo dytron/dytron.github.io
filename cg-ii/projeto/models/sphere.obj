@@ -1,9 +1,9 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
 # File Created: 29.05.2014 13:45:19
 
-#
-# object GeoSphere001
-#
+mtllib sphere.mtl
+
+o GeoSphere001
 
 v  0.0000 0.0000 10.0000
 v  1.3795 0.0000 9.9044

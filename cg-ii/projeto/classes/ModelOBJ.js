@@ -5,7 +5,6 @@ class Geometry {
         this.normals = [];
         this.tangents = [];
         this.colors = [];
-        this.indices = [];
     }
 }
 
@@ -41,26 +40,17 @@ export class ModelOBJ {
         const objTexcoords = [[0, 0]];
         const objNormals = [[0, 0, 0]];
         const objColors = [[0, 0, 0]];
-
-        // same order as `f` indices
+    
         const objVertexData = [
             objPositions,
             objTexcoords,
             objNormals,
             objColors,
         ];
-
-        let webglVertexData = [[], [], [], []];  // posições, texcoords, normais, cores
+    
         let currentGeometry = this.newGeometry();
-
-        const vertexMap = {};  // Mapa para compartilhamento de vértices
-
-        // Função para gerar chave única para um vértice (posição, texcoord, normal)
-        function getVertexKey(indices) {
-            return indices.join('/');
-        }
-
-        // Função para adicionar vértice reutilizando, se possível
+    
+        // Função para adicionar vértice
         const addVertex = (vert) => {
             const ptn = vert.split('/');
             const indices = ptn.map((objIndexStr, i) => {
@@ -68,26 +58,19 @@ export class ModelOBJ {
                 const objIndex = parseInt(objIndexStr);
                 return objIndex + (objIndex >= 0 ? 0 : objVertexData[i].length);
             });
-
-            const vertexKey = getVertexKey(indices);
-            if (vertexMap[vertexKey] === undefined) {
-                // Vértice ainda não existe, adiciona e armazena seu índice
-                const vertIndex = webglVertexData[0].length / 3; // Índice baseado na contagem de posições
-                vertexMap[vertexKey] = vertIndex;
-
-                // Adiciona dados do vértice nas respectivas posições (posição, texcoord, normal, cor)
-                indices.forEach((index, i) => {
-                    if (index !== undefined) {
-                        webglVertexData[i].push(...objVertexData[i][index]);
+    
+            indices.forEach((index, i) => {
+                if (index !== undefined) {
+                    switch (i) {
+                        case 0: currentGeometry.positions.push(...objVertexData[i][index]); break;
+                        case 1: currentGeometry.texcoords.push(...objVertexData[i][index]); break;
+                        case 2: currentGeometry.normals.push(...objVertexData[i][index]); break;
+                        case 3: currentGeometry.colors.push(...objVertexData[i][index]); break;
                     }
-                });
-
-                return vertIndex;
-            }
-
-            return vertexMap[vertexKey];
+                }
+            });
         };
-
+    
         const keywords = {
             v: (parts) => {
                 if (parts.length > 3) {
@@ -101,15 +84,14 @@ export class ModelOBJ {
                 objTexcoords.push(parts.slice(0, 2).map(parseFloat));
             },
             vn: (parts) => {
-                objNormals.push(parts.slice(0,3).map(parseFloat));
+                objNormals.push(parts.slice(0, 3).map(parseFloat));
             },
             f: (parts) => {
                 const numTriangles = parts.length - 2;
                 for (let tri = 0; tri < numTriangles; ++tri) {
-                    const i0 = addVertex(parts[0]);
-                    const i1 = addVertex(parts[tri + 1]);
-                    const i2 = addVertex(parts[tri + 2]);
-                    currentGeometry.indices.push(i0, i1, i2);  // Adiciona os índices
+                    addVertex(parts[0]);
+                    addVertex(parts[tri + 1]);
+                    addVertex(parts[tri + 2]);
                 }
             },
             mtllib: (parts) => {
@@ -122,28 +104,21 @@ export class ModelOBJ {
                 currentGeometry = this.newGeometry(currentGeometry.material, parts.join(' '));
             },
         };
-
+    
         const lines = text.split('\n');
         for (const line of lines) {
             const [keyword, ...parts] = line.trim().split(/\s+/);
             const handler = keywords[keyword];
             if (handler) handler.call(this, parts);
         }
-
-        this.geometries = this.geometries.filter(geometry => geometry.indices.length !== 0);
+    
+        this.geometries = this.geometries.filter(geometry => geometry.positions.length > 0);
         // Atualize dados da geometria
         this.geometries.forEach(geometry => {
-            geometry.positions = webglVertexData[0];
-            geometry.texcoords = webglVertexData[1];
-            geometry.normals = webglVertexData[2];
-            geometry.colors = webglVertexData[3];
-        });
-        this.geometries.forEach(geometry => {
             geometry.tangents = this.generateTangents(geometry);
-
-        })
+        });
     }
-
+    
     computeFaceNormal(v1, v2, v3) {
         if (!v1 || !v2 || !v3) {
             console.error("Invalid vertices for normal calculation", { v1, v2, v3 });

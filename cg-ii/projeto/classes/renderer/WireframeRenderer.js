@@ -8,7 +8,6 @@ export class WireframeRenderer extends BaseRenderer {
 
     initLocation(gl, program) {
         super.initLocation(gl, program);
-        // Obtém as localizações dos atributos e uniformes do shader
         this.uColor = gl.getUniformLocation(program, 'uColor'); 
     }
 
@@ -21,46 +20,66 @@ export class WireframeRenderer extends BaseRenderer {
         let program = this.program;
         gl.useProgram(program);
 
-        // Aplica as transformações
         this.applyMatrixTransform(model, viewMatrix, projectionMatrix);
 
         gl.uniform3fv(this.uColor, this.color);
 
-        // Renderize cada geometria dentro do modelo
         model.obj.geometries.forEach(geometry => {
-            // Buffer de posição dos vértices
-            const positionBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(geometry.positions.flat()), gl.STATIC_DRAW);
-            gl.vertexAttribPointer(this.aVertexPosition, 3, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(this.aVertexPosition);
+            this.initBuffersForGeometry(geometry);
+            this.bindBuffers(geometry);
 
-            // Buffer de índices das arestas (wireframe)
-            const edges = this.generateEdges(geometry.indices.flat());
-            const edgeBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, edgeBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(edges), gl.STATIC_DRAW);
-
-            // Desenha as arestas
-            gl.drawElements(gl.LINES, edges.length, gl.UNSIGNED_SHORT, 0);
+            // Desenha o wireframe
+            const edgeCount = (geometry.positions.length / 3) * 2;
+            gl.drawElements(gl.LINES, edgeCount, gl.UNSIGNED_SHORT, 0);
         });
     }
 
-    // Gera as arestas a partir dos índices dos triângulos
-    generateEdges(indices) {
-        const edges = new Set();
+    // Inicializa os buffers apenas se ainda não tiverem sido criados
+    initBuffersForGeometry(geometry) {
+        let gl = this.gl;
 
-        for (let i = 0; i < indices.length; i += 3) {
-            const edge1 = [indices[i], indices[i + 1]].sort((a, b) => a - b).join('-');
-            const edge2 = [indices[i + 1], indices[i + 2]].sort((a, b) => a - b).join('-');
-            const edge3 = [indices[i + 2], indices[i]].sort((a, b) => a - b).join('-');
-
-            edges.add(edge1);
-            edges.add(edge2);
-            edges.add(edge3);
+        if (!geometry.positionBuffer) {
+            geometry.positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, geometry.positionBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(geometry.positions.flat()), gl.STATIC_DRAW);
         }
 
-        // Converter o conjunto de arestas em um array de índices
-        return Array.from(edges).flatMap(edge => edge.split('-').map(Number));
+        if (!geometry.edgeBuffer) {
+            // Gera arestas implicitamente considerando que cada três vértices consecutivos formam um triângulo
+            const edgeIndices = this.generateEdgesFromTriangles(geometry.positions);
+            geometry.edgeBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, geometry.edgeBuffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(edgeIndices), gl.STATIC_DRAW);
+        }
+    }
+
+    // Faz apenas o bind dos buffers já criados
+    bindBuffers(geometry) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, geometry.positionBuffer);
+        gl.vertexAttribPointer(this.aVertexPosition, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(this.aVertexPosition);
+
+        if (geometry.edgeBuffer) {
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, geometry.edgeBuffer);
+        }
+    }
+
+    // Gera as arestas para os triângulos, assumindo que cada 3 vértices consecutivos formam um triângulo
+    generateEdgesFromTriangles(positions) {
+        const edgeIndices = [];
+        const numTriangles = positions.length / 3;
+
+        for (let i = 0; i < numTriangles; i++) {
+            const i0 = i * 3;
+            const i1 = i0 + 1;
+            const i2 = i0 + 2;
+
+            // Cada triângulo gera três arestas
+            edgeIndices.push(i0, i1);  // Aresta 1: v0 -> v1
+            edgeIndices.push(i1, i2);  // Aresta 2: v1 -> v2
+            edgeIndices.push(i2, i0);  // Aresta 3: v2 -> v0
+        }
+
+        return edgeIndices;
     }
 }

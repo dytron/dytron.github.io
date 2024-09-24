@@ -13,44 +13,38 @@ export class DepthMapRenderer extends BaseRenderer {
         this.uModelLightProjectionMatrix = gl.getUniformLocation(program, 'uModelLightProjectionMatrix');
     }
     
-
     setColor(color) {
         this.color = color;
         return this;
     }
 
     draw(model, lightMatrix, projectionMatrix) {
-        let gl = this.gl;
         let program = this.program;
 
         gl.useProgram(program);
 
-        // Aplica as transformações
         this.applyMatrixTransform(model, lightMatrix, projectionMatrix, {});
 
-        // Renderize cada geometria dentro do modelo
         model.obj.geometries.forEach(geometry => {
-            // Configura os buffers para a geometria atual
-            this.setupGeometryBuffers(geometry);
-
-            // Desenhar os elementos
-            gl.drawElements(gl.TRIANGLES, geometry.indices.length, gl.UNSIGNED_SHORT, 0);
+            this.initBuffersForGeometry(geometry);
+            this.bindBuffers(geometry);
+            gl.drawArrays(gl.TRIANGLES, 0, geometry.positions.length / 3);
         });
     }
 
-    setupGeometryBuffers(geometry) {
-        let gl = this.gl;
-
-        if (geometry.positions && geometry.positions.length > 0) {
-            const positionBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    initBuffersForGeometry(geometry) {
+        if (geometry.positions && geometry.positions.length > 0 && !geometry.positionBuffer) {
+            geometry.positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, geometry.positionBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(geometry.positions), gl.STATIC_DRAW);
+        }
+    }
+
+    bindBuffers(geometry) {
+        if (geometry.positionBuffer) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, geometry.positionBuffer);
             gl.vertexAttribPointer(this.aVertexPosition, 3, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(this.aVertexPosition);
         }
-
-        const indexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(geometry.indices), gl.STATIC_DRAW);
     }
 }

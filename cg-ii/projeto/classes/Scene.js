@@ -32,19 +32,23 @@ export class Scene {
             .setTarget([0, 0, 0])
             .setUpVector([0, 1, 0])
             .setBackgroundColor([0, 0, 0, 1]);
-
         // Configurações da camera do plano
         this.planeCamera.setPosition([0, 0, 4])
             .setTarget([0, 0, 0])
             .setUpVector([0, 1, 0])
             .setBackgroundColor([0.1, 0.1, 0.1, 1]);
 
+        this.camera.autoUpdateAspectRatio = false;
+        
         this.mainCameraController = new CameraController();
         this.mainCameraController.setCamera(this.camera);
         this.planeCameraController = new CameraController();
         this.planeCameraController.setCamera(this.planeCamera);
         this.cameraController = this.mainCameraController;
         this.skybox = new SkyBox(this.camera, this.textureManager);
+        
+        this.lastTime = 0;
+        this.step = ()=>{}
     }
     toggleCameraController() {
         if (this.cameraController == this.mainCameraController) {
@@ -74,7 +78,10 @@ export class Scene {
         return !this.models.find(m => !m.isLoaded());
     }
     
-    draw() {      
+    draw(currentTime) {     
+        let deltaTime = currentTime - this.lastTime;
+        this.step(deltaTime); 
+        this.lastTime = currentTime; 
         this.shadowMapping.apply(scene);  
         gl.clearColor(...this.camera.backgroundColor, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

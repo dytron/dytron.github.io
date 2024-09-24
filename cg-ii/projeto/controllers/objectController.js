@@ -131,14 +131,22 @@ function addObjectToScene(objectType, models, scene) {
         .setRotationX(0)
         .setRenderer(new ModelRenderer("default"));
       break;
-    case "sphere":
-      newModel = scene
-        .addModelFromOBJ("sphere")
-        .autoCenter()
-        .setScale([0.02, 0.02, 0.02])
-        .setRotationX(0)
-        .setRenderer(new ReflectionRenderer("reflections"));
-      break;
+      case "sphere":
+        newModel = scene
+          .addModelFromOBJ("sphere")
+          .autoCenter()
+          .setScale([0.02, 0.02, 0.02])
+          .setRotationX(0)
+          .setRenderer(new ModelRenderer("default"));
+        break;
+      case "sphere2":
+        newModel = scene
+          .addModelFromOBJ("sphere2")
+          .autoCenter()
+          .setScale([0.02, 0.02, 0.02])
+          .setRotationX(0)
+          .setRenderer(new ModelRenderer("default"));
+        break;
   }
 
   if (newModel) {

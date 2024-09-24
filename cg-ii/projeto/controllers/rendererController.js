@@ -6,6 +6,7 @@ import { WireframeRenderer } from "../classes/renderer/WireframeRenderer.js";
 import { MaterialRenderer } from "../classes/renderer/MaterialRenderer.js";
 import { ShadowMapRenderer } from "../classes/renderer/ShadowMapRenderer.js";
 import { ReflectionRenderer } from "../classes/renderer/ReflectionRenderer.js";
+import { DisplacementRenderer } from "../classes/renderer/DisplacementRenderer.js";
 
 export function updateRendererControls(models) {
   const objectSelect = document.getElementById("object-select");
@@ -76,12 +77,22 @@ export function updateRendererControls(models) {
       });
       break;
 
-      case "surface-normal":
-        renderer = new ModelRenderer("surface-normal");
-        break;
+    case "surface-normal":
+      renderer = new ModelRenderer("surface-normal");
+      break;
 
-      case "shadow-map":
+    case "shadow-map":
       renderer = new ShadowMapRenderer("shadow-map");
+      let materialURLS =
+        "./materials/" +
+        selectedModel.obj.url.split("/")[2].replace(".obj", ".mtl");
+      (async (renderer) => {
+        const material = await scene.materialManager.loadMtl(materialURLS);
+        renderer.setMaterials(material);
+        selectedModel.setRenderer(renderer);
+      })(renderer);
+
+
       break;
 
     case "point-light":
@@ -224,9 +235,8 @@ export function updateRendererControls(models) {
         const material = await scene.materialManager.loadMtl(materialURL);
         renderer.setMaterials(material);
         selectedModel.setRenderer(renderer);
-        const renderToTextureCheckbox = document.getElementById(
-          "render-to-texture"
-        );
+        const renderToTextureCheckbox =
+          document.getElementById("render-to-texture");
 
         // Adicionar um event listener para a checkbox
         renderToTextureCheckbox.addEventListener("change", function () {
@@ -235,32 +245,50 @@ export function updateRendererControls(models) {
         });
       })(renderer);
 
+      const ignoreLightDiv = document.createElement("div");
+      ignoreLightDiv.classList = ["input-group"];
+      // Criar o checkbox para ignorar luzes
+      const  ignoreLightLabel = document.createElement("label");
+      ignoreLightLabel.innerText = "Ignore Shading:";
+
+      const  ignoreLightCheckbox = document.createElement("input");
+      ignoreLightCheckbox.type = "checkbox";
+
+      // Adicionar o label e checkbox no painel de controles adicionais
+      ignoreLightDiv.appendChild(ignoreLightLabel);
+      ignoreLightDiv.appendChild(ignoreLightCheckbox);
+      additionalControls.appendChild(ignoreLightDiv);
+
+      // Adicionar o evento para o checkbox
+      ignoreLightCheckbox.addEventListener("change", () => {
+        const ignoreLight = ignoreLightCheckbox.checked;
+        renderer.setIgnoreLight(ignoreLight);
+      });
       break;
 
-      case "reflections":
-        renderer = new ReflectionRenderer("reflections");
-    
-        const ignoreLightDiv = document.createElement("div");
-        ignoreLightDiv.classList=["input-group"];
-        // Criar o checkbox para ignorar luzes
-        const ignoreLightLabel = document.createElement("label");
-        ignoreLightLabel.innerText = "Ignore Light:";
-        
-        const ignoreLightCheckbox = document.createElement("input");
-        ignoreLightCheckbox.type = "checkbox";
-    
-        // Adicionar o label e checkbox no painel de controles adicionais
-        ignoreLightDiv.appendChild(ignoreLightLabel);
-        ignoreLightDiv.appendChild(ignoreLightCheckbox);
-        additionalControls.appendChild(ignoreLightDiv);
-    
-        // Adicionar o evento para o checkbox
-        ignoreLightCheckbox.addEventListener("change", () => {
-            const ignoreLight = ignoreLightCheckbox.checked;
-            renderer.setIgnoreLight(ignoreLight);
-        });
-        break;
-    
+    case "reflections":
+      renderer = new ReflectionRenderer("reflections");
+
+      const ignoreLightDivR = document.createElement("div");
+      ignoreLightDivR.classList = ["input-group"];
+      // Criar o checkbox para ignorar luzes
+      const ignoreLightLabelR = document.createElement("label");
+      ignoreLightLabelR.innerText = "Ignore Shading:";
+
+      const ignoreLightCheckboxR = document.createElement("input");
+      ignoreLightCheckboxR.type = "checkbox";
+
+      // Adicionar o label e checkbox no painel de controles adicionais
+      ignoreLightDivR.appendChild(ignoreLightLabelR);
+      ignoreLightDivR.appendChild(ignoreLightCheckboxR);
+      additionalControls.appendChild(ignoreLightDivR);
+
+      // Adicionar o evento para o checkbox
+      ignoreLightCheckboxR.addEventListener("change", () => {
+        const ignoreLightR = ignoreLightCheckboxR.checked;
+        renderer.setIgnoreLight(ignoreLightR);
+      });
+      break;
 
     default:
       renderer = new ModelRenderer("default");

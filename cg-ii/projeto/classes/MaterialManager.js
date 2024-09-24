@@ -6,9 +6,24 @@ export class MaterialManager {
     }
     init() {
         this.defaultTextures = {
+            black: this.create1PixelTexture(gl, [0, 0, 0, 255]),
             white: this.create1PixelTexture(gl, [255, 255, 255, 255]),
             normal: this.create1PixelTexture(gl, [128, 128, 255, 255])
         }
+    }
+    getDefaultMaterial() {
+        return {
+            mapAmbient: this.defaultTextures.white,
+            mapDiffuse: this.defaultTextures.white,
+            mapSpecular: this.defaultTextures.white,
+            mapNormal: this.defaultTextures.normal,
+            mapDisplacement: this.defaultTextures.black,
+            ambient: [1, 1, 1],
+            diffuse: [1, 1, 1],
+            specular: [1, 1, 1],
+            emissive: [0, 0, 0],
+            shininess: 400,
+        };
     }
     create1PixelTexture(gl, pixel) {
         const texture = gl.createTexture();
@@ -26,6 +41,7 @@ export class MaterialManager {
 
         const image = new Image();
         image.onload = () => {
+            console.log("Textura carregada: " + url);
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
@@ -50,14 +66,30 @@ export class MaterialManager {
     async loadMtl(url) {
         // Extrai o baseUrl removendo o nome do arquivo e a extensão .mtl
         const baseUrl = url.substring(0, url.lastIndexOf('/') + 1);
-    
+        
+        // Verifica se os materiais já estão carregados
         if (this.materials.has(url)) {
             return this.materials.get(url); // Retorna o material já carregado
         }
     
-        const response = await fetch(url);
-        const mtlText = await response.text();
-        const materials = this.parseMtl(mtlText, baseUrl);
+        // Define materiais padrão
+        let materials = { DEFAULT : this.getDefaultMaterial() } ;
+    
+        try {
+            // Tenta carregar o arquivo .mtl
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Erro ao carregar ${url}`); // Gera erro caso não seja possível carregar
+            }
+            // Parseia o conteúdo do arquivo .mtl
+            const mtlText = await response.text();
+            materials = this.parseMtl(mtlText, baseUrl);
+        } catch (err) {
+            // Em caso de erro, utiliza os materiais padrão
+            console.log(`${url} não encontrado, usando texturas padrões.`);
+        }
+    
+        // Armazena os materiais (seja os carregados ou os padrões) no cache
         this.materials.set(url, materials);
         return materials;
     }
@@ -75,12 +107,7 @@ export class MaterialManager {
 
             switch (keyword) {
                 case "newmtl":
-                    currentMaterial = {
-                        mapAmbient: this.defaultTextures.white,
-                        mapDiffuse: this.defaultTextures.white,
-                        mapSpecular: this.defaultTextures.white,
-                        mapNormal: this.defaultTextures.normal
-                    };
+                    currentMaterial = this.getDefaultMaterial();
                     materials[values[0]] = currentMaterial;
                     break;
                 case "Ns":
@@ -109,6 +136,9 @@ export class MaterialManager {
                     break;
                 case "map_Bump":
                     currentMaterial.mapNormal = this.loadTexture(`${baseUrl}/${values[0]}`);
+                    break;
+                case "map_Disp":
+                    currentMaterial.mapDisplacement = this.loadTexture(`${baseUrl}/${values[0]}`);
                     break;
             }
         });

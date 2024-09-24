@@ -21,10 +21,12 @@ export class Camera extends SceneObject {
         this.right = 10;
         this.bottom = -10;
         this.top = 10;
-        this.orthoNear = 0.1; // Distância mínima para ortográfica
-        this.orthoFar = 200;  // Distância máxima para ortográfica
+        this.orthoNear = 0.01; // Distância mínima para ortográfica
+        this.orthoFar = 500;  // Distância máxima para ortográfica
 
         this.backgroundColor = [255, 0, 0];
+
+        this.autoUpdateAspectRatio = false;
     }
     setBackgroundColor(backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -74,7 +76,9 @@ export class Camera extends SceneObject {
         }
     }
     apply(viewMatrix, projectionMatrix) {
-        this.updateAspectRatio(gl.canvas);
+        this.viewMatrix = viewMatrix;
+        if (this.autoUpdateAspectRatio)
+            this.updateAspectRatio(gl.canvas);
         // Aplica transformações adicionais via controller, se existir
         this.controller.apply();
         // Aplica as transformações de visualização

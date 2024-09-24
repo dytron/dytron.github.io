@@ -2,6 +2,7 @@ import { ModelRenderer } from "../classes/renderer/ModelRenderer.js";
 import { PointRenderer } from "../classes/renderer/PointRenderer.js";
 import { FlatRenderer } from "../classes/renderer/FlatRenderer.js";
 import { ShadowMapRenderer } from "../classes/renderer/ShadowMapRenderer.js";
+import { MaterialRenderer } from "../classes/renderer/MaterialRenderer.js";
 
 export function configureScene(scene) {
   //
@@ -18,31 +19,30 @@ export function configureModels(scene) {
     .autoCenter()
     .setScale([0.02, 0.02, 0.02])
     .setRotationX(-Math.PI / 2)
-    .setRenderer(new ModelRenderer("default"));
+    .setRenderer(new ModelRenderer("default"))
 
   const cube = scene
     .addModelFromOBJ("cube")
     .autoCenter()
     .setScale([1, 0.01, 1])
     .setPosition([0, -0.16, 0])
-    .setRenderer(new ShadowMapRenderer("shadow-map"))
+    .setRenderer(new ModelRenderer("default"))
     .setCastShadows(false);
 
 
-  const models = [teapot];
+  const models = [teapot, cube];
 
   scene.shaderManager.setShaders([
     "default",
     "surface-normal",
     "point",
     "flat",
-    "point-light",
     "material",
     "cube-map",
     "depth-map",
     "reflections",
     "shadow-map",
-    "quad-shadow"
+    "quad-shadow",
   ]);
 
   return models;

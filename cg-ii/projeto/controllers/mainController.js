@@ -46,9 +46,9 @@ export function main(scene) {
 
 
   // Inicia o loop de renderização
-  const draw = () => {
+  const draw = (now) => {
     requestAnimationFrame(draw);
-    scene.draw();
+    scene.draw(now);
   };
 
   draw();

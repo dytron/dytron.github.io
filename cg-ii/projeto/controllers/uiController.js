@@ -45,6 +45,10 @@ export function updateUICameraInputs(camera) {
   );
 
   document.getElementById("cam-aspect").value = camera.aspect;
+  document.getElementById("cam-left").value = camera.left;
+  document.getElementById("cam-right").value = camera.right;
+  document.getElementById("cam-top").value = camera.top;
+  document.getElementById("cam-bottom").value = camera.bottom;
 }
 
 export function setupEventListeners(models, scene) {
