@@ -1,44 +1,63 @@
 <!DOCTYPE html>
-<html class="dark-theme">
+<html lang="en">
 
 <head>
-    <link rel="stylesheet" href="css/dark-theme.css">
-    <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guilherme Alfaia - Portfolio</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="shortcut icon" href="favicon.ico" />
 </head>
 
 <body>
-    <ul>
-        <li>Métodos Numéricos II
-            <ul>
-                <li>Dupla:</li>
-                <li>Guilherme Alfaia</li>
-                <li>Carlos Magno</li>
-            </ul>
-        </li>
-        <ul>
-            <li><a href="./mn-ii/tarefa-1-2-filtros/">Tarefa 1.2 - Filtros Convolucionais</a></li>
-            <li><a href="./mn-ii/tarefa-3-newton/">Tarefa 3 - Fórmulas de Newton-Cotes</a></li>
-            <li><a href="./mn-ii/tarefa-5-gauss-legendre/">Tarefa 5 - Integração de Gauss-Legendre</a></li>
-            <li class="unselected"><a href="./mn-ii/tarefa-6/">Tarefa 6 - Quadraturas Especiais</a></li>
-            <li class="unselected"><a href="./mn-ii/tarefa-7/">Tarefa 7 - Integração com singularidade em um dos
-                    limites</a></li>
-            <li><a href="./mn-ii/tarefa-10-potencia-regular/">Tarefa 10 - Método da Potência Regular</a></li>
-            <li><a href="./mn-ii/tarefa-11-potencia-inversa/">Tarefa 11 - Método da Potência Inversa</a></li>
-            <li><a href="./mn-ii/tarefa-12-householder/">Tarefa 12 - Método de Householder</a></li>
-            <li><a href="./mn-ii/tarefa-12-jacobi/">Tarefa 12 - Método de Jacobi</a></li>
-            <li><a href="./mn-ii/tarefa-13-runge-kutta/">Tarefa 13 - Método de Runge-Kutta</a></li>
-            <li><a href="/">Tarefa 15 - Diferenças Finitas (CONSOLE)</a></li>
-        </ul>
-        <li>Computação Gráfica II
-            <ul>
-                <li>Guilherme Alfaia</li>
-            </ul>
-        </li>
-        <ul>
-            <li><a href="./cg-ii/projeto/">Projeto de Interactive Computer Graphics</a></li>
-            <li><a href="https://graphics.cs.utah.edu/courses/cs6610/spring2021/">Link para as atividades</a></li>
-        </ul>
-    </ul>
+    <header>
+        <h1>Guilherme Alfaia Caetano</h1>
+        <nav>
+            <a href="#about">About</a>
+            <a href="#projects">Projects</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <main>
+        <section id="about" class="about-section">
+            <img src="img/guilherme.jpeg" alt="Guilherme Alfaia" class="profile-photo" />
+            <div class="about-text">
+                <h2>About Me</h2>
+                <p>I'm Guilherme, a Game & Web Developer who builds games and web apps using GameMaker, JavaScript, and Node.js.</p>
+            </div>
+        </section>
+
+
+        <section id="projects">
+            <h2>Projects</h2>
+            <div class="projects-grid">
+                    <div class="project-card">
+                        <img src="img/auth-portal.png" alt="Auth Portal thumbnail" class="project-thumb" />
+                        <h3>Auth Portal</h3>
+                        <p>Simple login page using HTML, CSS and JavaScript.</p>
+                        <div class="tech-icons">
+                            <img src="/icons/icon-html5.svg" alt="HTML5" title="HTML5" width="32" height="32" />
+                            <img src="/icons/icon-css.svg" alt="CSS3" title="CSS3" width="32" height="32" />
+                            <img src="/icons/icon-js.svg" alt="JavaScript" title="JavaScript" width="32" height="32" />
+                        </div>
+                        <a href="/auth-portal/login.html" target="_blank" rel="noopener noreferrer" class="demo-link">View Demo</a>
+   
+                    </div>
+             </div>
+
+        </section>
+
+        <section id="contact">
+            <h2>Contact</h2>
+            <p>You can reach me at <b>guilherme.alfaia.caetano@gmail.com</b> or on WhatsApp: +55
+                85 99636-8960.</p>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2025 Guilherme Alfaia
+    </footer>
 </body>
 
 </html>

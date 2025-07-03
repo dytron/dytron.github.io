@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Forgot Password</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <div id="vanta-bg"></div>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <h2>Forgot Password</h2>
+        <!-- Forgot Password Form -->
+        <form method="get" action="login.html" autocomplete="off" onsubmit="return false;">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="Enter your email" required autofocus />
+            <p style="font-size: 0.9rem; color: #ccc; margin-top: 0.5rem;">
+                We'll send you a link to reset your password.
+            </p>
+            <input type="submit" value="Send Reset Link" style="margin-top: 1rem;" />
+        </form>
+        <!-- Back to login -->
+        <form method="get" action="login.html" style="margin-top: 1.2rem;">
+            <button type="submit" class="button-outline">Back to Login</button>
+        </form>
+    </div>
+
+    <!-- Vanta Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    <script>
+        VANTA.NET({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.0,
+            scaleMobile: 1.0,
+            color: 0x66e0ff,
+            backgroundColor: 0x000000,
+            points: 14.0,
+            maxDistance: 20.0,
+            spacing: 16.0
+        });
+    </script>
+</body>
+
+</html>
