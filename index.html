@@ -2,77 +2,193 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Guilherme Alfaia - Portfolio</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="shortcut icon" href="favicon.ico" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guilherme Alfaia - Portfolio</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="shortcut icon" href="favicon.ico" />
 </head>
 
 <body>
-    <header>
-        <h1>Guilherme Alfaia Caetano</h1>
-        <nav>
-            <a href="#about">About</a>
-            <a href="#projects">Projects</a>
-            <a href="#contact">Contact</a>
-        </nav>
-    </header>
+  <header>
+    <h1>Guilherme</h1>
+    <button id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-menu">
+      &#9776; <!-- ☰ -->
+    </button>
+    
+    <nav id="nav-menu">
+      <a href="#about">About</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
 
-    <main>
-        <section id="about" class="about-section">
-            <img src="img/guilherme.jpeg" alt="Guilherme Alfaia" class="profile-photo" />
-            <div class="about-text">
-                <h2>About Me</h2>
-                <p>I'm Guilherme, a Game & Web Developer who builds games and web apps using GameMaker, JavaScript, and
-                    Node.js.</p>
-            </div>
-        </section>
+  <main>
+    <section id="about" class="about-section" aria-label="About Me slider">
+      <img src="img/guilherme.jpeg" alt="Guilherme Alfaia" class="profile-photo" />
+      <div class="about-text">
+        <h2>About Me</h2>
+        <div class="slider" role="region" aria-live="polite" aria-atomic="true">
+          <div class="slide active" role="group" aria-roledescription="slide" aria-label="Slide 1">
+            <p>I’m a full-stack developer and automation specialist with 2+ years of experience using JavaScript,
+              Python, and SQL.</p>
+          </div>
+          <div class="slide" role="group" aria-roledescription="slide" aria-label="Slide 2">
+            <p>I build modern web apps with Next.js, React, Node.js, Express.js, and Prisma.js.</p>
+          </div>
+          <div class="slide" role="group" aria-roledescription="slide" aria-label="Slide 3">
+            <p>On the backend, I work with SQL Server, MySQL, and API development.</p>
+          </div>
+          <div class="slide" role="group" aria-roledescription="slide" aria-label="Slide 4">
+            <p>For automation and scraping, I use Python with Selenium, Beautiful Soup, and Playwright.</p>
+          </div>
+          <div class="slide" role="group" aria-roledescription="slide" aria-label="Slide 5">
+            <p>I released a solo game on Steam using GameMaker, blending creativity with code.</p>
+          </div>
+        </div>
+
+        <button class="slider-btn prev" aria-label="Previous slide">&#10094;</button>
+        <button class="slider-btn next" aria-label="Next slide">&#10095;</button>
+
+        <div class="dots" role="tablist" aria-label="Slide navigation"></div>
+      </div>
+    </section>
 
 
-        <section id="projects">
-            <h2>Projects</h2>
-            <div class="projects-grid">
-                <div class="project-card">
-                    <img src="img/auth-portal.png" alt="Auth Portal thumbnail" class="project-thumb" />
-                    <h3>Auth Portal</h3>
-                    <p>Simple login page using HTML, CSS and JavaScript.</p>
-                    <div class="tech-icons">
-                        <img src="/icons/icon-html5.svg" alt="HTML5" title="HTML5" width="32" height="32" />
-                        <img src="/icons/icon-css.svg" alt="CSS3" title="CSS3" width="32" height="32" />
-                        <img src="/icons/icon-js.svg" alt="JavaScript" title="JavaScript" width="32" height="32" />
-                    </div>
-                    <a href="/auth-portal/login.html" target="_blank" rel="noopener noreferrer" class="demo-link">View
-                        Demo</a>
 
-                </div>
-                <div class="project-card">
-                    <img src="img/pdf-merger.png" alt="PDF Merge thumbnail" class="project-thumb" />
-                    <h3>PDF Merger</h3>
-                    <p>Merge multiple PDF files quickly and easily.</p>
-                    <div class="tech-icons">
-                        <img src="/icons/icon-html5.svg" alt="HTML5" title="HTML5" width="32" height="32" />
-                        <img src="/icons/icon-css.svg" alt="CSS3" title="CSS3" width="32" height="32" />
-                        <img src="/icons/icon-js.svg" alt="JavaScript" title="JavaScript" width="32" height="32" />
-                    </div>
-                    <a href="/pdf-merger/index.html" target="_blank" rel="noopener noreferrer" class="demo-link">View
-                        Demo</a>
-                </div>
 
-            </div>
+    <section id="projects">
+      <h2>Projects</h2>
+      <div class="projects-grid">
+        <div class="project-card">
+          <img src="img/auth-portal.png" alt="Auth Portal thumbnail" class="project-thumb" />
+          <h3>Auth Portal</h3>
+          <p>Simple login page using HTML, CSS and JavaScript.</p>
+          <div class="tech-icons">
+            <img src="/icons/icon-html5.svg" alt="HTML5" title="HTML5" width="32" height="32" />
+            <img src="/icons/icon-css.svg" alt="CSS3" title="CSS3" width="32" height="32" />
+            <img src="/icons/icon-js.svg" alt="JavaScript" title="JavaScript" width="32" height="32" />
+          </div>
+          <a href="/auth-portal/login.html" target="_blank" rel="noopener noreferrer" class="demo-link">View
+            Demo</a>
 
-        </section>
+        </div>
+        <div class="project-card">
+          <img src="img/pdf-merger.png" alt="PDF Merge thumbnail" class="project-thumb" />
+          <h3>PDF Merger</h3>
+          <p>Merge multiple PDF files quickly and easily.</p>
+          <div class="tech-icons">
+            <img src="/icons/icon-html5.svg" alt="HTML5" title="HTML5" width="32" height="32" />
+            <img src="/icons/icon-css.svg" alt="CSS3" title="CSS3" width="32" height="32" />
+            <img src="/icons/icon-js.svg" alt="JavaScript" title="JavaScript" width="32" height="32" />
+          </div>
+          <a href="/pdf-merger/index.html" target="_blank" rel="noopener noreferrer" class="demo-link">View
+            Demo</a>
+        </div>
 
-        <section id="contact">
-            <h2>Contact</h2>
-            <p>You can reach me at <b>guilherme.alfaia.caetano@gmail.com</b> or on WhatsApp: +55
-                85 99636-8960.</p>
-        </section>
-    </main>
+      </div>
 
-    <footer>
-        &copy; 2025 Guilherme Alfaia
-    </footer>
+    </section>
+
+    <section id="contact">
+      <h2>Contact</h2>
+      <p>You can reach me at <b>guilherme.alfaia.caetano@gmail.com</b> or on WhatsApp: +55
+        85 99636-8960.</p>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2025 Guilherme Alfaia Caetano
+  </footer>
+  <script>
+    const slides = document.querySelectorAll('#about .slide');
+    const prevBtn = document.querySelector('.slider-btn.prev');
+    const nextBtn = document.querySelector('.slider-btn.next');
+    const dotsContainer = document.querySelector('.dots');
+
+    let currentIndex = 0;
+    let autoSlideInterval;
+
+    function createDots() {
+      slides.forEach((_, i) => {
+        const btn = document.createElement('button');
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+        btn.setAttribute('aria-label', `Go to slide ${i + 1}`);
+        btn.addEventListener('click', () => {
+          goToSlide(i);
+          resetAutoSlide();
+        });
+        dotsContainer.appendChild(btn);
+      });
+    }
+
+    function updateDots(index) {
+      const dots = dotsContainer.querySelectorAll('button');
+      dots.forEach((dot, i) => {
+        dot.setAttribute('aria-selected', i === index ? 'true' : 'false');
+      });
+    }
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+      updateDots(index);
+    }
+
+    function goToSlide(index) {
+      currentIndex = (index + slides.length) % slides.length;
+      showSlide(currentIndex);
+    }
+
+    function nextSlide() {
+      goToSlide(currentIndex + 1);
+    }
+
+    function prevSlide() {
+      goToSlide(currentIndex - 1);
+    }
+
+    function resetAutoSlide() {
+      clearInterval(autoSlideInterval);
+      autoSlideInterval = setInterval(nextSlide, 4000);
+    }
+
+    prevBtn.addEventListener('click', () => {
+      prevSlide();
+      resetAutoSlide();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      nextSlide();
+      resetAutoSlide();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') {
+        prevSlide();
+        resetAutoSlide();
+      }
+      if (e.key === 'ArrowRight') {
+        nextSlide();
+        resetAutoSlide();
+      }
+    });
+
+    createDots();
+    showSlide(currentIndex);
+    resetAutoSlide();
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.getElementById('nav-menu');
+
+    hamburger.addEventListener('click', () => {
+      const expanded = hamburger.getAttribute('aria-expanded') === 'true' || false;
+      hamburger.setAttribute('aria-expanded', !expanded);
+      navMenu.classList.toggle('active');
+    });
+
+  </script>
 </body>
 
 </html>

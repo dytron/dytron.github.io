@@ -40,8 +40,9 @@ header {
 }
 
 header h1 {
-  font-size: 1.7rem;
-  font-weight: 700;
+  margin: 0;
+  font-size: 1.5rem;
+  color: #eee;
 }
 
 nav a {
@@ -183,10 +184,6 @@ footer {
   flex-shrink: 0;
 }
 
-.about-text {
-  flex: 1;
-}
-
 @media (max-width: 600px) {
   .about-section {
     flex-direction: column;
@@ -212,4 +209,195 @@ footer {
 
 .demo-link:hover {
   background-color: #4bb0d6;
+}
+
+.about-section {
+  display: flex;
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto;
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.profile-photo {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.about-section {
+  display: flex;
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto;
+  gap: 2rem;
+  padding: 1rem;
+  flex-wrap: wrap;
+}
+
+.profile-photo {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.about-text {
+  flex: 1 1 300px;
+  position: relative;
+  min-height: 140px;
+  padding: 0 50px;
+}
+
+.slider {
+  position: relative;
+  overflow: hidden;
+  height: 140px;
+  margin-bottom: 1rem;
+}
+
+.slide {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease-in-out;
+  padding-right: 1rem;
+  pointer-events: none;
+  user-select: none;
+}
+
+.slide.active {
+  opacity: 1;
+  position: relative;
+  pointer-events: auto;
+}
+
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(50%);
+  background: #333;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.slider-btn:focus {
+  outline: 2px solid #0078d7;
+  outline-offset: 2px;
+}
+
+.slider-btn.prev {
+  left: 0;
+}
+
+.slider-btn.next {
+  right: 0;
+}
+
+.dots {
+  text-align: center;
+}
+
+.dots button {
+  border: none;
+  background: #ccc;
+  width: 12px;
+  height: 12px;
+  margin: 0 6px;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.dots button[aria-selected="true"] {
+  background: #333;
+}
+
+.dots button:focus {
+  outline: 2px solid #0078d7;
+  outline-offset: 2px;
+}
+
+/* Example: add top padding on small/mobile screens */
+@media (max-width: 768px) {
+  body, main.container {
+    padding-top: 60px;
+  }
+}
+
+/* Hide hamburger on desktop */
+#hamburger {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #eee;     /* light color */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  display: none;
+}
+
+/* Desktop nav */
+nav {
+  display: flex;
+  gap: 2rem;
+}
+
+/* Mobile styles */
+@media (max-width: 600px) {
+  #hamburger {
+    display: flex;
+  }
+
+  nav {
+    display: none; /* hidden by default */
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #121212; /* dark background */
+    width: 150px;
+    flex-direction: column;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    border-radius: 4px;
+    padding: 1rem;
+    z-index: 1001;
+  }
+
+  nav.active {
+    display: flex;
+  }
+
+  nav a {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #333;
+    color: #eee; /* light text */
+    text-decoration: none;
+  }
+
+  nav a:last-child {
+    border-bottom: none;
+  }
+
+  nav a:hover,
+  nav a:focus {
+    color: #fff;
+    text-decoration: underline;
+    outline: none;
+  }
+}
+
+/* Hamburger lines on hover or when expanded */
+#hamburger:hover
+#hamburger[aria-expanded="true"] {
+  background-color: #fff; /* brighter on hover/active */
 }
