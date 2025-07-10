@@ -107,6 +107,7 @@ label.btn {
   position: relative;
   cursor: grab;
   transition: box-shadow 0.2s ease, transform 0.15s ease;
+  touch-action: pan-y;
 }
 
 .file-item:last-child {
@@ -291,4 +292,9 @@ label.btn {
 .drop-zone:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(0,123,255,0.5);
+}
+.drag-handle {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
 }

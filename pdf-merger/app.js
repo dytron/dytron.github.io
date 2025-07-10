@@ -40,8 +40,7 @@ async function renderFileList() {
     previewWrapper.className = "preview-wrapper";
 
     const previewCanvas = document.createElement("canvas");
-    previewCanvas.className = "pdf-preview";
-
+    previewCanvas.className = "pdf-preview drag-handle";
     const pageCount = await renderPdfPreview(file, previewCanvas);
 
     const removeBtn = document.createElement("button");
@@ -94,6 +93,7 @@ async function updateUI() {
 
   sortable = Sortable.create(fileList, {
     animation: 150,
+  handle: '.drag-handle',
     onEnd: (evt) => {
       const { oldIndex, newIndex } = evt;
       if (oldIndex === newIndex) return;
@@ -106,22 +106,7 @@ async function updateUI() {
   });
 }
 
-
-
-// Initialize SortableJS on the list
-let sortable = Sortable.create(fileList, {
-  animation: 150,
-  onEnd: (evt) => {
-    const { oldIndex, newIndex } = evt;
-    if (oldIndex === newIndex) return;
-
-    // Reorder the pdfFiles array according to the movement
-    const [movedFile] = pdfFiles.splice(oldIndex, 1);
-    pdfFiles.splice(newIndex, 0, movedFile);
-
-    updateUI();
-  },
-});
+let sortable = null;
 
 fileInput.addEventListener("change", (e) => {
   pdfFiles.push(...e.target.files);
