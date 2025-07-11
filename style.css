@@ -1,4 +1,4 @@
-/* Reset básico */
+/* Reset */
 * {
   margin: 0;
   padding: 0;
@@ -58,7 +58,7 @@ nav a:hover {
 
 /* Main container */
 main {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 100px auto 40px;
   padding: 0 1rem;
 }
@@ -133,9 +133,9 @@ h2 {
 
 /* Tech icons */
 .tech-icons img {
-  width: 32px;
-  height: 32px;
-  filter: brightness(0.9);
+  width: 64px;
+  height: 64px;
+  filter: brightness(1);
   transition: filter 0.3s ease;
   cursor: default;
 }
@@ -155,7 +155,7 @@ footer {
   box-shadow: 0 -2px 8px rgba(0,0,0,0.8);
 }
 
-/* Responsividade simples */
+/* Mobile */
 @media (max-width: 600px) {
   nav a {
     margin-left: 1rem;
