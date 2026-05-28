@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Geo Viewer</title>
+    <link rel="stylesheet" href="css/rook.css" />
+    <link rel="stylesheet" href="css/geo_viewer.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Geometria Computacional</h1>
+      <span class="header-sep"></span>
+      <nav class="nav-tabs">
+        <a class="nav-tab active" href="index.html">Geo Viewer</a>
+      </nav>
+    </header>
+
+    <div class="main">
+      <aside class="sidebar">
+        <div class="sidebar-scroll">
+          <details open>
+            <summary>Primitivas</summary>
+
+            <div class="radio-row">
+              <label><input type="radio" name="prim-type" value="cube" checked /> Cubo</label>
+              <label><input type="radio" name="prim-type" value="sphere" /> Esfera</label>
+              <label><input type="radio" name="prim-type" value="cone" /> Cone</label>
+              <label><input type="radio" name="prim-type" value="cylinder" /> Cilindro</label>
+            </div>
+
+            <div class="prop-row">
+              <label>N pontos</label>
+              <input
+                type="number"
+                id="prim-n"
+                class="n-points-inp"
+                min="4"
+                max="100000"
+                value="100"
+              />
+            </div>
+
+            <div id="prim-params"></div>
+
+            <div class="prop-row gen-row">
+              <label>Destino</label>
+              <select id="target-group-prim" class="target-select">
+                <option value="-1">Novo grupo</option>
+              </select>
+            </div>
+            <div class="gen-row">
+              <button class="btn btn-reset btn-full" id="btn-add">Adicionar</button>
+            </div>
+          </details>
+
+          <details>
+            <summary>Manual</summary>
+            <div class="hint">Um ponto por linha: x y z</div>
+            <textarea
+              id="manual-points"
+              class="manual-ta"
+              placeholder="0 0 0&#10;1 0 0&#10;0 1 0&#10;0 0 1"
+            ></textarea>
+            <div class="prop-row gen-row">
+              <label>Destino</label>
+              <select id="target-group-manual" class="target-select">
+                <option value="-1">Novo grupo</option>
+              </select>
+            </div>
+            <div class="gen-row">
+              <button class="btn btn-reset btn-full" id="btn-add-manual">Adicionar</button>
+            </div>
+          </details>
+
+          <details open>
+            <summary>Grupos <span id="group-count"></span></summary>
+            <div id="group-list" class="group-list"></div>
+            <div class="hint">Amostrar pontos no interior:</div>
+            <div class="prop-row">
+              <input
+                type="number"
+                id="sample-n"
+                class="n-points-inp"
+                min="1"
+                max="100000"
+                value="200"
+              />
+              <select id="target-group-sample" class="target-select" style="flex: 1">
+                <option value="-2">Todos</option>
+              </select>
+            </div>
+            <div class="gen-row">
+              <button class="btn btn-reset btn-full" id="btn-sample">Gerar</button>
+            </div>
+            <div class="gen-row">
+              <button class="btn btn-danger btn-full" id="btn-clear">Limpar tudo</button>
+            </div>
+          </details>
+
+          <details open>
+            <summary>Operação</summary>
+            <div class="radio-row">
+              <label
+                ><input type="radio" name="op" value="hull_group" checked /> Fecho por grupo</label
+              >
+              <label><input type="radio" name="op" value="hull_global" /> Fecho global</label>
+              <label><input type="radio" name="op" value="tet" /> Tetraedralização</label>
+            </div>
+            <div class="gen-row">
+              <button class="btn btn-import btn-full" id="btn-calculate">Calcular</button>
+            </div>
+            <div class="gen-row">
+              <button class="btn btn-reset btn-full" id="btn-step-mode">Passo a passo</button>
+            </div>
+          </details>
+
+          <details id="step-panel" style="display: none">
+            <summary>Passo a Passo</summary>
+            <div class="prop-row" style="justify-content: center">
+              <span id="step-counter">Passo 1 de 1</span>
+            </div>
+            <div class="prop-row" style="justify-content: center">
+              <span id="step-group-label" class="step-group-label">Grupo: todos</span>
+            </div>
+            <div class="prop-row step-auto-row">
+              <label for="step-total-ms">Tempo total</label>
+              <input
+                type="number"
+                id="step-total-ms"
+                min="100"
+                step="100"
+                value="4000"
+                class="step-ms-input"
+              />
+              <span class="val">ms</span>
+            </div>
+            <div class="gen-row">
+              <button class="btn btn-import btn-full" id="btn-step-play">Automático</button>
+            </div>
+            <div class="gen-row step-nav-row">
+              <button class="btn btn-reset step-btn" id="btn-step-prev" disabled>
+                <img class="icon-svg step-icon" src="assets/icons/arrow-left.svg" alt="" />
+                <span>Anterior</span>
+              </button>
+              <button class="btn btn-import step-btn step-btn-next" id="btn-step-next">
+                <span>Próximo</span>
+                <img class="icon-svg step-icon" src="assets/icons/arrow-right.svg" alt="" />
+              </button>
+            </div>
+            <div class="gen-row">
+              <button class="btn btn-danger btn-full" id="btn-step-exit">Sair</button>
+            </div>
+          </details>
+
+          <details open>
+            <summary>Visualização</summary>
+            <div class="check-row check-col">
+              <label><input type="checkbox" id="vis-points" checked /> Pontos</label>
+              <label><input type="checkbox" id="vis-hull" checked /> Fecho</label>
+              <label><input type="checkbox" id="vis-edges" checked /> Arestas</label>
+              <label><input type="checkbox" id="vis-tets" /> Tetraedros</label>
+              <label><input type="checkbox" id="vis-numbers" /> Números</label>
+            </div>
+            <div class="prop-row">
+              <label>Opacidade</label>
+              <input type="range" id="hull-opacity" min="0.05" max="1" step="0.05" value="0.45" />
+              <span class="val" id="hull-opacity-val">0.45</span>
+            </div>
+            <div class="prop-row">
+              <label>Tam. ponto</label>
+              <input type="range" id="point-size" min="0.005" max="0.2" step="0.005" value="0.04" />
+              <span class="val" id="point-size-val">0.040</span>
+            </div>
+            <div class="prop-row" id="numsize-row" style="display: none">
+              <label>Tam. número</label>
+              <input type="range" id="num-size" min="8" max="48" step="2" value="18" />
+              <span class="val" id="num-size-val">18</span>
+            </div>
+          </details>
+
+          <details id="tet-panel" style="display: none">
+            <summary>Tetraedros</summary>
+            <div class="prop-row">
+              <label>Grupo</label>
+              <select id="tet-group-select" class="target-select"></select>
+            </div>
+            <div id="tet-list" class="tet-list"></div>
+          </details>
+        </div>
+
+        <div class="sidebar-status" id="status">Pronto.</div>
+      </aside>
+
+      <div class="canvas-wrap">
+        <div class="canvas-toolbar">
+          <label class="toolbar-btn toolbar-icon" for="obj-file" title="Importar OBJ">
+            <img class="icon-svg" src="assets/icons/import.svg" alt="" />
+          </label>
+          <input type="file" id="obj-file" accept=".obj" />
+          <label class="toolbar-import-opt" title="Centralizar ao importar OBJ">
+            <input type="checkbox" id="opt-center" /> C
+          </label>
+          <label class="toolbar-import-opt" title="Normalizar ao importar OBJ">
+            <input type="checkbox" id="opt-normalize" /> N
+          </label>
+          <div class="toolbar-sep"></div>
+          <select id="export-mode" class="toolbar-select" title="O que exportar">
+            <option value="points">Pontos</option>
+            <option value="hull">Fecho</option>
+            <option value="tets">Tetraedros</option>
+          </select>
+          <button class="toolbar-btn toolbar-icon" id="btn-export-obj" title="Exportar OBJ">
+            <img class="icon-svg" src="assets/icons/export.svg" alt="" />
+          </button>
+          <div class="toolbar-sep"></div>
+          <button
+            class="toolbar-btn toolbar-icon active"
+            id="btn-toggle-grid"
+            title="Ativar/desativar grid"
+          >
+            <img class="icon-svg" src="assets/icons/grid.svg" alt="" />
+          </button>
+          <button class="toolbar-btn toolbar-icon" id="btn-save-img" title="Salvar imagem">
+            <img class="icon-svg" src="assets/icons/image.svg" alt="" />
+          </button>
+          <button
+            class="toolbar-btn toolbar-icon active"
+            id="btn-toggle-axes"
+            title="Ativar/desativar eixos"
+          >
+            <img class="icon-svg" src="assets/icons/axes.svg" alt="" />
+          </button>
+        </div>
+        <canvas id="canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Painel de edição de pontos -->
+    <div id="editor-overlay" class="editor-overlay">
+      <div class="editor-panel">
+        <div class="editor-header">
+          <span id="editor-title">Editar pontos</span>
+          <button class="editor-close" id="editor-close-btn">x</button>
+        </div>
+        <div class="editor-body">
+          <table class="editor-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>X</th>
+                <th>Y</th>
+                <th>Z</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="editor-tbody"></tbody>
+          </table>
+        </div>
+        <div class="editor-footer">
+          <button class="btn btn-reset" id="editor-add-row">+ Ponto</button>
+          <div style="flex: 1"></div>
+          <button class="btn" id="editor-cancel">Cancelar</button>
+          <button class="btn btn-import" id="editor-save">Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="js/common/axes.js"></script>
+    <!-- Lógica de geometria -->
+    <script src="js/geo/logic/points.js"></script>
+    <script src="js/geo/logic/primitives.js"></script>
+    <script src="js/geo/logic/obj_parser.js"></script>
+    <script src="js/geo/logic/vec2.js"></script>
+    <script src="js/geo/logic/vec3.js"></script>
+    <script src="js/geo/logic/merge_sort.js"></script>
+    <script src="js/geo/logic/queue.js"></script>
+    <script src="js/geo/logic/winged_edge.js"></script>
+    <script src="js/geo/logic/hull_struct_simple.js"></script>
+    <script src="js/geo/logic/hull_struct_winged.js"></script>
+    <script src="js/geo/logic/jarvis-3d/core.js"></script>
+    <script src="js/geo/logic/jarvis-3d/edge_cases.js"></script>
+    <script src="js/geo/logic/jarvis-3d/coplanar.js"></script>
+    <script src="js/geo/logic/jarvis-3d/output.js"></script>
+    <script src="js/geo/logic/jarvis-3d/steps.js"></script>
+    <script src="js/geo/logic/jarvis-3d/main.js"></script>
+    <script src="js/geo/logic/jarvis_3d.js"></script>
+    <script src="js/geo/logic/geo_api.js"></script>
+    <script src="js/geo/view/viewer_scene.js"></script>
+    <script src="js/geo/view/primitive_ui.js"></script>
+    <script src="js/geo/view/point_editor.js"></script>
+    <script src="js/geo/view/viewer_ui.js"></script>
+  </body>
+</html>
