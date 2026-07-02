@@ -42,6 +42,20 @@ function _updateStatus() {
   else if (nV) msg += ` | ${nV} vértices`;
   if (nF) msg += ` | ${nF} faces`;
   if (nT) msg += ` | ${nT} tetraedros`;
+  const totalVol = state.groups.reduce((s, g) => {
+    if (!g.tetVerts || !g.tets) return s;
+    let v = 0;
+    for (let t = 0; t < g.tets.length / 4; t++) {
+      const i0 = g.tets[t*4], i1 = g.tets[t*4+1], i2 = g.tets[t*4+2], i3 = g.tets[t*4+3];
+      const a = {x:g.tetVerts[i0*3],y:g.tetVerts[i0*3+1],z:g.tetVerts[i0*3+2]};
+      const b = {x:g.tetVerts[i1*3],y:g.tetVerts[i1*3+1],z:g.tetVerts[i1*3+2]};
+      const c = {x:g.tetVerts[i2*3],y:g.tetVerts[i2*3+1],z:g.tetVerts[i2*3+2]};
+      const d = {x:g.tetVerts[i3*3],y:g.tetVerts[i3*3+1],z:g.tetVerts[i3*3+2]};
+      v += Math.abs(Vec3.dot(Vec3.sub(b,a), Vec3.cross(Vec3.sub(c,a), Vec3.sub(d,a)))) / 6;
+    }
+    return s + v;
+  }, 0);
+  if (totalVol > 0) msg += ` | vol ${totalVol.toFixed(4)}`;
   if (state.calcMs !== null) msg += ` | ${state.calcMs} ms`;
   _setStatus(msg);
 }
@@ -92,7 +106,6 @@ function _renderGroupList() {
   // Sincroniza os três selects de destino
   _syncSelect('target-group-prim', 1); // "Novo grupo" = opção 0
   _syncSelect('target-group-manual', 1);
-  _syncSelect('target-group-sample', 1); // "Todos" = opção 0
 
   list.querySelectorAll('.group-vis').forEach((cb) => {
     cb.addEventListener('change', () => {
@@ -256,6 +269,57 @@ function _buildStepHullGroup(sequence, step) {
   };
 }
 
+function _buildStepTetGroup(sequence, step) {
+  const nTets = step.tets.length;
+  const usados = {};
+  for (let t = 0; t < nTets; t++) {
+    const tet = step.tets[t];
+    for (let v = 0; v < 4; v++) usados[tet[v]] = true;
+  }
+  const indexMap = {};
+  let next = 0;
+  for (const orig in usados) {
+    indexMap[orig] = next;
+    next++;
+  }
+  const verts = new Float64Array(next * 3);
+  for (const orig in indexMap) {
+    const local = indexMap[orig];
+    const p = sequence.pts[+orig];
+    verts[local * 3] = p.x;
+    verts[local * 3 + 1] = p.y;
+    verts[local * 3 + 2] = p.z;
+  }
+  const tets = new Int32Array(nTets * 4);
+  for (let t = 0; t < nTets; t++) {
+    const tet = step.tets[t];
+    tets[t * 4] = indexMap[tet[0]];
+    tets[t * 4 + 1] = indexMap[tet[1]];
+    tets[t * 4 + 2] = indexMap[tet[2]];
+    tets[t * 4 + 3] = indexMap[tet[3]];
+  }
+
+  // Reconstrói as faces do fecho com índices locais do tet output
+  const hullIndexMap = {};
+  let hullNext = 0;
+  const nHullVerts = sequence.hullVerts.length / 3;
+  for (let i = 0; i < nHullVerts; i++) {
+    hullIndexMap[i] = hullNext;
+    hullNext++;
+  }
+
+  return {
+    name: sequence.name,
+    inputPoints: sequence.pts,
+    hullVerts: sequence.hullVerts,
+    hullFaces: sequence.hullFaces,
+    hullIndices: sequence.hullIndices,
+    tetVerts: verts,
+    tets: tets,
+    color: sequence.color || GROUP_COLORS[0],
+  };
+}
+
 function _renderStep(i) {
   const frame = stepState.frames[i];
   const sequence = stepState.sequences[frame.seqIndex];
@@ -264,20 +328,45 @@ function _renderStep(i) {
   const step = steps[frame.stepIndex];
 
   document.getElementById('step-counter').textContent = `Passo ${i + 1} de ${stepState.frames.length}`;
+
+  const isTet = sequence.isTet;
+  const label = isTet ? 'Tetraedralizando' : 'Fechando';
   document.getElementById('step-group-label').textContent =
-    `Fechando grupo ${frame.seqIndex + 1}/${stepState.sequences.length}: ${sequence.name}`;
+    `${label} grupo ${frame.seqIndex + 1}/${stepState.sequences.length}: ${sequence.name}`;
   _syncStepControls();
 
   const groups = [];
   for (let seqIndex = 0; seqIndex < frame.seqIndex; seqIndex++) {
     const finishedSequence = stepState.sequences[seqIndex];
-    groups.push(_buildStepHullGroup(finishedSequence, finishedSequence.steps[finishedSequence.steps.length - 1]));
+    const lastStep = finishedSequence.steps[finishedSequence.steps.length - 1];
+    if (finishedSequence.isTet) {
+      groups.push(_buildStepTetGroup(finishedSequence, lastStep));
+    } else {
+      groups.push(_buildStepHullGroup(finishedSequence, lastStep));
+    }
   }
-  groups.push(_buildStepHullGroup(sequence, step));
 
-  const pa = step.activeEdge ? pts[step.activeEdge.a] : null;
-  const pb = step.activeEdge ? pts[step.activeEdge.b] : null;
-  setActiveEdge(pa, pb);
+  if (isTet) {
+    const tetGroup = _buildStepTetGroup(sequence, step);
+    if (layerVis.showTets === false) {
+      const cb = document.getElementById('vis-tets');
+      if (cb && !cb.checked) {
+        cb.checked = true;
+        setLayerVis('showTets', true);
+      }
+    }
+    groups.push(tetGroup);
+  } else {
+    groups.push(_buildStepHullGroup(sequence, step));
+  }
+
+  if (!isTet) {
+    const pa = step.activeEdge ? pts[step.activeEdge.a] : null;
+    const pb = step.activeEdge ? pts[step.activeEdge.b] : null;
+    setActiveEdge(pa, pb);
+  } else {
+    setActiveEdge(null, null);
+  }
 
   setGroups(groups);
 }
@@ -506,11 +595,17 @@ async function calculate() {
         if (state.rawGroups.length > 1)
           _setStatus(`Calculando grupo "${name}" (${i + 1}/${state.rawGroups.length})...`);
         let tetVerts = null,
-          tets = null;
+          tets = null,
+          hullVerts = null,
+          hullFaces = null,
+          hullIndices = null;
         try {
           const r = await tetrahedralize(points);
           tetVerts = r.verts;
           tets = r.tets;
+          hullVerts = r.hullVerts || null;
+          hullFaces = r.hullFaces || null;
+          hullIndices = r.hullIndices || null;
           if (!tets || tets.length === 0)
             avisos.push(`"${name}": sem tetraedros (pontos degenerados?)`);
         } catch (err) {
@@ -519,9 +614,9 @@ async function calculate() {
         processados.push({
           name,
           inputPoints: points,
-          hullVerts: null,
-          hullFaces: null,
-          hullIndices: null,
+          hullVerts,
+          hullFaces,
+          hullIndices,
           tetVerts,
           tets,
           color: cor,
@@ -544,6 +639,8 @@ async function calculate() {
         cb.checked = true;
         setLayerVis('showTets', true);
       }
+      var explRow = document.getElementById('tet-explode-row');
+      if (explRow) explRow.style.display = '';
       _renderTetList();
     } else {
       _hideTetList();
@@ -747,6 +844,18 @@ function _bindUI() {
   document.querySelectorAll('input[name="op"]').forEach((r) => {
     r.addEventListener('change', () => {
       state.op = r.value;
+      var isTet = r.value === 'tet';
+      var visIds = { 'vis-points': !isTet, 'vis-hull': !isTet, 'vis-edges': !isTet, 'vis-tets': isTet };
+      for (var visId in visIds) {
+        var cb = document.getElementById(visId);
+        if (cb && cb.checked !== visIds[visId]) {
+          cb.checked = visIds[visId];
+          var layerMap = { 'vis-points': 'showPoints', 'vis-hull': 'showHull', 'vis-edges': 'showHullEdges', 'vis-tets': 'showTets' };
+          setLayerVis(layerMap[visId], visIds[visId]);
+        }
+      }
+      var er = document.getElementById('tet-explode-row');
+      if (er) er.style.display = isTet ? '' : 'none';
     });
   });
 
@@ -764,8 +873,31 @@ function _bindUI() {
       _setStatus('Adicione pontos primeiro.');
       return;
     }
+
     if (state.op === 'tet') {
-      _setStatus('Passo a passo só funciona para fecho convexo.');
+      const sequences = [];
+      for (let i = 0; i < state.rawGroups.length; i++) {
+        const group = state.rawGroups[i];
+        const result = tetDelaunaySteps(group.points);
+        if (!result) continue;
+        sequences.push({
+          name: group.name,
+          pts: result.pts,
+          steps: result.steps,
+          hullVerts: result.hullVerts,
+          hullFaces: result.hullFaces,
+          hullIndices: result.hullIndices,
+          color: GROUP_COLORS[i % GROUP_COLORS.length],
+          isTet: true,
+        });
+      }
+      if (!sequences.length) {
+        _setStatus('Pontos insuficientes (mínimo 4).');
+        return;
+      }
+      const totalSteps = sequences.reduce((sum, seq) => sum + seq.steps.length, 0);
+      _enterStepMode(sequences);
+      _setStatus(`${totalSteps} passos em ${sequences.length} grupo(s). Use os botões ou o modo automático.`);
       return;
     }
 
@@ -821,44 +953,6 @@ function _bindUI() {
   document.getElementById('btn-step-exit').addEventListener('click', _exitStepMode);
   document.getElementById('step-total-ms').addEventListener('change', _readStepTotalMs);
 
-  async function _sampleGroup(index, n) {
-    const raw = state.rawGroups[index];
-    if (raw.points.length < 4) return 0;
-    let hv = state.groups[index]?.hullVerts || null;
-    let hf = state.groups[index]?.hullFaces || null;
-    if (!hv || !hf) {
-      try {
-        const r = await convexHull3D(raw.points);
-        hv = r.verts;
-        hf = r.faces;
-      } catch (_) {}
-    }
-    const novos = sampleConvex(raw.points, n, hv, hf);
-    state.rawGroups[index].points = dedupPoints(raw.points.concat(novos));
-    return novos.length;
-  }
-
-  document.getElementById('btn-sample').addEventListener('click', async () => {
-    if (!state.rawGroups.length) {
-      _setStatus('Nenhum grupo para amostrar.');
-      return;
-    }
-    const n = Math.max(1, parseInt(document.getElementById('sample-n').value) || 200);
-    const selVal = +document.getElementById('target-group-sample').value;
-    let total = 0;
-    if (selVal === -2) {
-      for (let i = 0; i < state.rawGroups.length; i++) total += await _sampleGroup(i, n);
-      _renderGroupList();
-      _showRawGroups();
-      _setStatus(`${total} pontos adicionados em ${state.rawGroups.length} grupo(s).`);
-    } else {
-      total = await _sampleGroup(selVal, n);
-      _renderGroupList();
-      _showRawGroups();
-      _setStatus(`${total} pontos adicionados ao grupo "${state.rawGroups[selVal].name}".`);
-    }
-  });
-
   // Adiciona grupo a partir de pontos digitados manualmente
   const btnManual = document.getElementById('btn-add-manual');
   if (btnManual) {
@@ -899,6 +993,10 @@ function _bindUI() {
       setLayerVis(chave, el.checked);
       if (id === 'vis-numbers')
         document.getElementById('numsize-row').style.display = el.checked ? '' : 'none';
+      if (id === 'vis-tets') {
+        var er = document.getElementById('tet-explode-row');
+        if (er) er.style.display = el.checked ? '' : 'none';
+      }
     });
   }
 
@@ -928,6 +1026,15 @@ function _bindUI() {
       const v = +nsSlider.value;
       if (nsVal) nsVal.textContent = v;
       setNumSize(v);
+    });
+
+  const teSlider = document.getElementById('tet-explode');
+  const teVal = document.getElementById('tet-explode-val');
+  if (teSlider)
+    teSlider.addEventListener('input', () => {
+      const v = parseFloat(teSlider.value);
+      if (teVal) teVal.textContent = v.toFixed(2);
+      setTetExplode(v);
     });
 
   document.getElementById('btn-export-obj').addEventListener('click', exportOBJ);

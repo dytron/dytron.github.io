@@ -16,9 +16,11 @@ const layerVis = {
 
 let _pointSize = 0.04;
 let _hullOpacity = 0.45;
+let _tetOpacity = 1;
+let _tetExplode = 0.04;
 let _numSize = 18;
-let _selectedTet = -1; // índice do tet selecionado (-1 = nenhum)
-let _selectedTetGroup = -1; // índice do grupo ao qual o tet pertence
+let _selectedTet = -1;
+let _selectedTetGroup = -1;
 
 function initViewerScene(canvasEl) {
   _vRenderer = new THREE.WebGLRenderer({
@@ -214,6 +216,139 @@ function _makeTetWire(verts, tets, skipIndex) {
   return geo;
 }
 
+// Centroide de um tetraedro.
+function _tetCentroid(verts, i0, i1, i2, i3) {
+  return [
+    (verts[i0 * 3] + verts[i1 * 3] + verts[i2 * 3] + verts[i3 * 3]) * 0.25,
+    (verts[i0 * 3 + 1] + verts[i1 * 3 + 1] + verts[i2 * 3 + 1] + verts[i3 * 3 + 1]) * 0.25,
+    (verts[i0 * 3 + 2] + verts[i1 * 3 + 2] + verts[i2 * 3 + 2] + verts[i3 * 3 + 2]) * 0.25,
+  ];
+}
+
+// Aplica escala em torno do centroide do tet: v' = c + (v - c) * s
+function _explodeVert(vx, vy, vz, cx, cy, cz, s) {
+  return [cx + (vx - cx) * s, cy + (vy - cy) * s, cz + (vz - cz) * s];
+}
+
+// Monta a lista de faces a renderizar. Com explosão 0 só mostra contorno (boundary).
+function _collectTetFacesToDraw(tets, explode) {
+  var faceSlots = [[0,1,2,3],[0,3,1,2],[0,2,3,1],[1,3,2,0]];
+  var nTets = tets.length / 4;
+  var allFaces = [];
+
+  // Conta quantas vezes cada face (por vértices ordenados) aparece
+  var count = {};
+  for (var t = 0; t < nTets; t++) {
+    var base = t * 4;
+    var iv = [tets[base], tets[base+1], tets[base+2], tets[base+3]];
+    for (var fi = 0; fi < 4; fi++) {
+      var fa = faceSlots[fi];
+      var sorted = [iv[fa[0]], iv[fa[1]], iv[fa[2]]];
+      if (sorted[0] > sorted[1]) { var tmp = sorted[0]; sorted[0] = sorted[1]; sorted[1] = tmp; }
+      if (sorted[1] > sorted[2]) { var tmp = sorted[1]; sorted[1] = sorted[2]; sorted[2] = tmp; }
+      if (sorted[0] > sorted[1]) { var tmp = sorted[0]; sorted[0] = sorted[1]; sorted[1] = tmp; }
+      var key = sorted[0] + ',' + sorted[1] + ',' + sorted[2];
+      count[key] = (count[key] || 0) + 1;
+      allFaces.push({ tet: t, face: fa, key: key });
+    }
+  }
+
+  // Com explosão > 0 mostra todas, senão só as de contorno (count == 1)
+  var showAll = explode > 0.01;
+  var result = [];
+  for (var i = 0; i < allFaces.length; i++) {
+    if (showAll || count[allFaces[i].key] === 1) {
+      result.push(allFaces[i]);
+    }
+  }
+  return result;
+}
+
+// Faces sólidas dos tetraedros com explosão e normais orientadas pra fora.
+function _makeTetFaces(verts, tets, explode) {
+  var scale = 1 - explode * 0.8;
+  var nTets = tets.length / 4;
+  var faces = _collectTetFacesToDraw(tets, explode);
+  var pos = new Float32Array(faces.length * 9);
+  var nrm = new Float32Array(faces.length * 9);
+  var off = 0;
+
+  for (var i = 0; i < faces.length; i++) {
+    var f = faces[i];
+    var base = f.tet * 4;
+    var iv = [tets[base], tets[base+1], tets[base+2], tets[base+3]];
+    var c = _tetCentroid(verts, iv[0], iv[1], iv[2], iv[3]);
+    var fa = f.face;
+    var tri = [];
+    for (var vi = 0; vi < 3; vi++) {
+      var vertI = iv[fa[vi]];
+      tri.push(_explodeVert(verts[vertI*3], verts[vertI*3+1], verts[vertI*3+2], c[0], c[1], c[2], scale));
+    }
+    var ux = tri[1][0]-tri[0][0], uy = tri[1][1]-tri[0][1], uz = tri[1][2]-tri[0][2];
+    var wx = tri[2][0]-tri[0][0], wy = tri[2][1]-tri[0][1], wz = tri[2][2]-tri[0][2];
+    var nx = uy*wz-uz*wy, ny = uz*wx-ux*wz, nz = ux*wy-uy*wx;
+
+    var opI = iv[fa[3]];
+    var ox = verts[opI*3] - tri[0][0], oy = verts[opI*3+1] - tri[0][1], oz = verts[opI*3+2] - tri[0][2];
+    if (nx*ox + ny*oy + nz*oz > 0) {
+      nx = -nx; ny = -ny; nz = -nz;
+      var tmp = tri[1]; tri[1] = tri[2]; tri[2] = tmp;
+    }
+
+    var len = Math.sqrt(nx*nx+ny*ny+nz*nz) || 1;
+    for (var vi = 0; vi < 3; vi++) {
+      pos[off] = tri[vi][0]; pos[off+1] = tri[vi][1]; pos[off+2] = tri[vi][2];
+      nrm[off] = nx/len; nrm[off+1] = ny/len; nrm[off+2] = nz/len;
+      off += 3;
+    }
+  }
+
+  var geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
+  return geo;
+}
+
+// Wireframe de todos os tetraedros com explosão, pulando skipIndex.
+function _makeTetWireExplode(verts, tets, skipIndex, explode) {
+  var scale = 1 - explode * 0.8;
+  var pares = [[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+  var positions = [];
+  var nTets = tets.length / 4;
+  for (var t = 0; t < nTets; t++) {
+    if (t === skipIndex) continue;
+    var base = t * 4;
+    var iv = [tets[base], tets[base+1], tets[base+2], tets[base+3]];
+    var c = _tetCentroid(verts, iv[0], iv[1], iv[2], iv[3]);
+    for (var pi = 0; pi < pares.length; pi++) {
+      var ia = iv[pares[pi][0]], ib = iv[pares[pi][1]];
+      var a = _explodeVert(verts[ia*3], verts[ia*3+1], verts[ia*3+2], c[0], c[1], c[2], scale);
+      var b = _explodeVert(verts[ib*3], verts[ib*3+1], verts[ib*3+2], c[0], c[1], c[2], scale);
+      positions.push(a[0], a[1], a[2], b[0], b[1], b[2]);
+    }
+  }
+  var geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+  return geo;
+}
+
+// Wireframe de um tet com explosão.
+function _makeSingleTetWireExplode(verts, i0, i1, i2, i3, explode) {
+  var scale = 1 - explode * 0.8;
+  var c = _tetCentroid(verts, i0, i1, i2, i3);
+  var pares = [[i0,i1],[i0,i2],[i0,i3],[i1,i2],[i1,i3],[i2,i3]];
+  var pos = [];
+  for (var pi = 0; pi < pares.length; pi++) {
+    var a = pares[pi][0], b = pares[pi][1];
+    var va = _explodeVert(verts[a*3], verts[a*3+1], verts[a*3+2], c[0], c[1], c[2], scale);
+    var vb = _explodeVert(verts[b*3], verts[b*3+1], verts[b*3+2], c[0], c[1], c[2], scale);
+    pos.push(va[0], va[1], va[2], vb[0], vb[1], vb[2]);
+  }
+  var geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos), 3));
+  return geo;
+}
+
 function _makePointCloud(pts) {
   const buf = new Float32Array(pts.length * 3);
   pts.forEach((p, i) => {
@@ -381,14 +516,32 @@ function _rebuildViewerScene() {
         const selLocal =
           _selectedTetGroup === i && _selectedTet >= 0 && _selectedTet < nTets ? _selectedTet : -1;
 
+        // Faces sólidas: sem explosão usa o fecho (se disponível), com explosão usa as faces dos tets
+        if (_tetOpacity > 0) {
+          const tetTransp = _tetOpacity < 0.99;
+          var tetFaceGeo = _makeTetFaces(g.tetVerts, g.tets, _tetExplode);
+          _vRoot.add(
+            new THREE.Mesh(
+              tetFaceGeo,
+              new THREE.MeshLambertMaterial({
+                color: cor,
+                side: tetTransp ? THREE.DoubleSide : THREE.FrontSide,
+                transparent: tetTransp,
+                opacity: _tetOpacity,
+                depthWrite: !tetTransp,
+              })
+            )
+          );
+        }
+
+        // Wireframe
         _vRoot.add(
           new THREE.LineSegments(
-            _makeTetWire(g.tetVerts, g.tets, selLocal),
+            _makeTetWireExplode(g.tetVerts, g.tets, selLocal, _tetExplode),
             new THREE.LineBasicMaterial({ color: cor, opacity: 0.5, transparent: true })
           )
         );
 
-        // Destaca o tet selecionado em amarelo
         if (selLocal >= 0) {
           const base = selLocal * 4;
           const [i0, i1, i2, i3] = [
@@ -399,7 +552,7 @@ function _rebuildViewerScene() {
           ];
           _vRoot.add(
             new THREE.LineSegments(
-              _makeSingleTetWire(g.tetVerts, i0, i1, i2, i3),
+              _makeSingleTetWireExplode(g.tetVerts, i0, i1, i2, i3, _tetExplode),
               new THREE.LineBasicMaterial({ color: 0xffff00 })
             )
           );
@@ -485,6 +638,14 @@ function setOpacity(v) {
 }
 function setNumSize(v) {
   _numSize = v;
+  _rebuildViewerScene();
+}
+function setTetOpacity(v) {
+  _tetOpacity = v;
+  _rebuildViewerScene();
+}
+function setTetExplode(v) {
+  _tetExplode = v;
   _rebuildViewerScene();
 }
 

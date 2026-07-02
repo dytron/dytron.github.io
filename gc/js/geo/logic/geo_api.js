@@ -1,11 +1,13 @@
 function isTetrahedralizeAvailable() {
-  return false;
+  return true;
 }
 
 async function convexHull3D(pts) {
   return jarvis3DJS(pts);
 }
 
-async function tetrahedralize() {
-  throw new Error('Tetraedralização não disponível neste trabalho.');
+async function tetrahedralize(pts) {
+  var result = tetDelaunay(pts);
+  if (!result) throw new Error('Pontos insuficientes para tetraedralizar.');
+  return result;
 }

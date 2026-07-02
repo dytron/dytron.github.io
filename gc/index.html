@@ -75,23 +75,6 @@
           <details open>
             <summary>Grupos <span id="group-count"></span></summary>
             <div id="group-list" class="group-list"></div>
-            <div class="hint">Amostrar pontos no interior:</div>
-            <div class="prop-row">
-              <input
-                type="number"
-                id="sample-n"
-                class="n-points-inp"
-                min="1"
-                max="100000"
-                value="200"
-              />
-              <select id="target-group-sample" class="target-select" style="flex: 1">
-                <option value="-2">Todos</option>
-              </select>
-            </div>
-            <div class="gen-row">
-              <button class="btn btn-reset btn-full" id="btn-sample">Gerar</button>
-            </div>
             <div class="gen-row">
               <button class="btn btn-danger btn-full" id="btn-clear">Limpar tudo</button>
             </div>
@@ -175,6 +158,11 @@
               <label>Tam. número</label>
               <input type="range" id="num-size" min="8" max="48" step="2" value="18" />
               <span class="val" id="num-size-val">18</span>
+            </div>
+            <div class="prop-row" id="tet-explode-row" style="display: none">
+              <label>Encolhimento</label>
+              <input type="range" id="tet-explode" min="0" max="1" step="0.02" value="0.04" />
+              <span class="val" id="tet-explode-val">0.04</span>
             </div>
           </details>
 
@@ -286,6 +274,12 @@
     <script src="js/geo/logic/jarvis-3d/steps.js"></script>
     <script src="js/geo/logic/jarvis-3d/main.js"></script>
     <script src="js/geo/logic/jarvis_3d.js"></script>
+    <script src="js/geo/logic/delaunay-3d/math.js"></script>
+    <script src="js/geo/logic/delaunay-3d/core.js"></script>
+    <script src="js/geo/logic/delaunay-3d/edge_cases.js"></script>
+    <script src="js/geo/logic/delaunay-3d/output.js"></script>
+    <script src="js/geo/logic/delaunay-3d/steps.js"></script>
+    <script src="js/geo/logic/delaunay-3d/main.js"></script>
     <script src="js/geo/logic/geo_api.js"></script>
     <script src="js/geo/view/viewer_scene.js"></script>
     <script src="js/geo/view/primitive_ui.js"></script>

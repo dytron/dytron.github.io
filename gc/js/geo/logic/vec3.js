@@ -21,9 +21,14 @@ const Vec3 = {
     return a.x * b.x + a.y * b.y + a.z * b.z;
   },
 
+  // Comprimento ao quadrado
+  norm2(v) {
+    return v.x * v.x + v.y * v.y + v.z * v.z;
+  },
+
   // Comprimento do vetor
   norm(v) {
-    return Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+    return Math.sqrt(Vec3.norm2(v));
   },
 
   // Normaliza o vetor para comprimento 1

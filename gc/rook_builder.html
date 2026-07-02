@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Rook Builder</title>
+    <link rel="stylesheet" href="css/rook.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Geometria Computacional</h1>
+      <span class="header-sep"></span>
+      <nav class="nav-tabs">
+        <a class="nav-tab active" href="rook_builder.html">Rook Builder</a>
+        <a class="nav-tab" href="index.html">Geo Viewer</a>
+      </nav>
+    </header>
+
+    <div class="main">
+      <aside class="sidebar">
+        <div class="sidebar-scroll">
+          <details open>
+            <summary>Geometria</summary>
+            <div class="prop-row">
+              <label>Segmentos</label>
+              <input type="range" id="seg" min="3" max="24" value="12" />
+              <span class="val" id="seg-val">12</span>
+            </div>
+          </details>
+
+          <details open>
+            <summary>
+              Perfil
+              <button
+                class="label-btn"
+                id="btn-add-ring"
+                title="Adicionar tronco"
+                onclick="event.stopPropagation()"
+              >
+                +
+              </button>
+            </summary>
+            <div class="hint">
+              H = altura &nbsp;|&nbsp; R&#8320; = raio base &nbsp;|&nbsp; R = raio topo
+            </div>
+            <div class="rings-list" id="rings-list"></div>
+          </details>
+
+          <details>
+            <summary>Escala</summary>
+            <div class="scale-row">
+              <label>X</label>
+              <input type="range" id="sx" min="0.1" max="4" step="0.01" value="0.7" />
+              <input type="number" id="sx-num" min="0.01" step="0.01" value="0.70" />
+            </div>
+            <div class="scale-row">
+              <label>Y</label>
+              <input type="range" id="sy" min="0.1" max="4" step="0.01" value="1" />
+              <input type="number" id="sy-num" min="0.01" step="0.01" value="1.00" />
+            </div>
+            <div class="scale-row">
+              <label>Z</label>
+              <input type="range" id="sz" min="0.1" max="4" step="0.01" value="0.7" />
+              <input type="number" id="sz-num" min="0.01" step="0.01" value="0.70" />
+            </div>
+          </details>
+
+          <details>
+            <summary>Visualização</summary>
+            <div class="check-row">
+              <label><input type="checkbox" id="vis-mesh" checked /> Malha</label>
+              <label><input type="checkbox" id="vis-edges" checked /> Arestas</label>
+              <label><input type="checkbox" id="vis-points" /> Pontos</label>
+              <label><input type="checkbox" id="vis-numbers" /> Números</label>
+            </div>
+            <div class="prop-row" id="opacity-row">
+              <label>Opacidade</label>
+              <input type="range" id="mesh-opacity" min="0.05" max="1" step="0.05" value="1" />
+              <span class="val" id="mesh-opacity-val">1.0</span>
+            </div>
+            <div class="prop-row" id="edge-color-row">
+              <label>Cor arestas</label>
+              <input type="color" id="edge-color" value="#222222" />
+            </div>
+            <div class="prop-row" id="pointsize-row" style="display: none">
+              <label>Tam. ponto</label>
+              <input type="range" id="point-size" min="1" max="20" step="1" value="4" />
+              <span class="val" id="point-size-val">4</span>
+            </div>
+            <div class="prop-row" id="numsize-row" style="display: none">
+              <label>Tam. número</label>
+              <input type="range" id="num-size" min="8" max="48" step="2" value="18" />
+              <span class="val" id="num-size-val">18</span>
+            </div>
+          </details>
+
+          <details open>
+            <summary>Ameias (topo)</summary>
+            <div class="prop-row">
+              <label>Altura</label>
+              <input type="range" id="merlon-h" min="0.01" max="0.5" step="0.01" value="0.13" />
+              <span class="val" id="merlon-h-val">0.13</span>
+            </div>
+            <div class="prop-row">
+              <label>R externo</label>
+              <input type="range" id="merlon-ro" min="0.1" max="1.5" step="0.01" value="0.62" />
+              <span class="val" id="merlon-ro-val">0.62</span>
+            </div>
+            <div class="prop-row">
+              <label>R interno</label>
+              <input type="range" id="merlon-ri" min="0.05" max="1.4" step="0.01" value="0.52" />
+              <span class="val" id="merlon-ri-val">0.52</span>
+            </div>
+            <div class="hint">Clique para ligar/desligar cada merlo:</div>
+
+            <div class="merlon-preview" id="merlon-slots"></div>
+          </details>
+        </div>
+
+        <div class="sidebar-footer">
+          <button class="btn btn-reset" onclick="resetDefaults()">Reset</button>
+          <button class="btn btn-import" onclick="importJSON()">Importar</button>
+          <button class="btn btn-export" onclick="exportJSON()">JSON</button>
+          <button class="btn btn-obj" onclick="exportOBJ()">OBJ</button>
+        </div>
+      </aside>
+
+      <div class="canvas-wrap">
+        <div class="canvas-toolbar">
+          <button
+            class="toolbar-btn toolbar-icon active"
+            id="btn-toggle-grid"
+            title="Ativar/desativar grid"
+          >
+            <img class="icon-svg" src="assets/icons/grid.svg" alt="" />
+          </button>
+          <button
+            class="toolbar-btn toolbar-icon"
+            id="btn-toggle-axes"
+            title="Ativar/desativar eixos"
+          >
+            <img class="icon-svg" src="assets/icons/axes.svg" alt="" />
+          </button>
+        </div>
+        <canvas id="canvas"></canvas>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="js/common/axes.js"></script>
+    <!-- logica de geometria -->
+    <script src="js/rook/logic/geometry.js"></script>
+    <!-- visualizacao e ui -->
+    <script src="js/rook/view/scene.js"></script>
+    <script src="js/rook/view/ui.js"></script>
+  </body>
+</html>
